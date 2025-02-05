@@ -18,7 +18,8 @@ rect_height = 50
 while True:
     surface.fill((0,0,0))
     pygame.draw.rect(surface, (255,255,0), 
-                     (rect_x - rect_width / 2, rect_y - rect_height / 2,
+                     (rect_x - rect_width / 2, 
+                      rect_y - rect_height / 2,
                       rect_width, rect_height))
     rect_width += 1
     rect_height += 1

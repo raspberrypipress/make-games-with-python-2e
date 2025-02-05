@@ -16,7 +16,8 @@ blue_level = random.randint(0, 255)
 
 while True:
     surface.fill((0,0,0))
-    pygame.draw.rect(surface, (red_level, green_level, blue_level),
+    pygame.draw.rect(surface, 
+                     (red_level, green_level, blue_level),
                      (50, 50, win_width / 2, win_height / 2))
     if red_level >= 255:
         red_level = random.randint(0, 255)
