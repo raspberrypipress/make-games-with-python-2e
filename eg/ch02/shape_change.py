@@ -10,15 +10,18 @@ win_height = 480
 surface = pygame.display.set_mode((win_width, win_height))
 pygame.display.set_caption('Pygame Shapes!')
 
-green_square_x = win_width / 2
-green_square_y = win_height / 2
+rect_x = win_width / 2
+rect_y = win_height / 2
+rect_width = 50
+rect_height = 50
 
 while True:
     surface.fill((0,0,0))
-    pygame.draw.rect(surface, (0, 255, 0), 
-                     (green_square_x, green_square_y, 10, 10))
-    green_square_x += 1
-    #green_square_y += 1
+    pygame.draw.rect(surface, (255,255,0), 
+                     (rect_x - rect_width / 2, rect_y - rect_height / 2,
+                      rect_width, rect_height))
+    rect_width += 1
+    rect_height += 1
 
     for event in GAME_EVENTS.get():
         if event.type == GAME_GLOBALS.QUIT:
@@ -26,4 +29,3 @@ while True:
             sys.exit()
     clock.tick(60)
     pygame.display.update()
-

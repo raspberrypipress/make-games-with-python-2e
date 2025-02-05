@@ -3,6 +3,8 @@ import pygame.locals as GAME_GLOBALS
 import pygame.event as GAME_EVENTS
 
 pygame.init()
+clock = pygame.time.Clock()
+
 win_width = 640
 win_height = 480
 surface = pygame.display.set_mode((win_width, win_height))
@@ -17,4 +19,5 @@ while True:
         if event.type == GAME_GLOBALS.QUIT:
             pygame.quit()
             sys.exit()
+    clock.tick(60)
     pygame.display.update()
