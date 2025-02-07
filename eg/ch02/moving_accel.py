@@ -28,5 +28,5 @@ while True:
     blue_square_vy += 0.1
     # End drawing statements
 
-    pygame.display.flip()
+    pygame.display.update()
     clock.tick(60)

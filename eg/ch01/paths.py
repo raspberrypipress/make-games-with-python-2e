@@ -13,5 +13,5 @@ while True:
                      (0, 0), (500, 400), 1)
     # End drawing statements
 
-    pygame.display.flip()
+    pygame.display.update()
     clock.tick(60)

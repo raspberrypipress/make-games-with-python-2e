@@ -28,5 +28,5 @@ while True:
     rect_height += 1
     # End drawing statements
 
-    pygame.display.flip()
+    pygame.display.update()
     clock.tick(60)

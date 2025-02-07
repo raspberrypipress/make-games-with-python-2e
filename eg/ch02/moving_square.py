@@ -24,5 +24,5 @@ while True:
     #green_square_y += 1
     # End drawing statements
 
-    pygame.display.flip()
+    pygame.display.update()
     clock.tick(60)

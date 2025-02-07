@@ -20,5 +20,5 @@ while True:
     pygame.draw.rect(window, (255,0,0), (x, y, 10, 10))
     # End drawing statements
 
-    pygame.display.flip()
+    pygame.display.update()
     clock.tick(60)

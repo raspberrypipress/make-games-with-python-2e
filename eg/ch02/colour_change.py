@@ -36,5 +36,5 @@ while True:
         blue_level += 1
     # End drawing statements
 
-    pygame.display.flip()
+    pygame.display.update()
     clock.tick(60)
