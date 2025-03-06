@@ -12,8 +12,8 @@ pygame.display.set_caption('Pygame Keyboard!')
 
 # Square Variables
 playerSize = 20
-playerX = (win_width / 2) - (playerSize / 2)
-playerY = win_height - playerSize
+player_x = (win_width / 2) - (playerSize / 2)
+player_y = win_height - playerSize
 player_vx = 1.0
 player_vy = 0.0
 maxjump_vy = 25.0
@@ -22,25 +22,25 @@ max_vx = 10.0
 gravity = 1.0
 
 def move(direction, jump):
-    global playerX, playerY, player_vx, player_vy, haveJumped, gravity
+    global player_x, player_y, player_vx, player_vy, haveJumped, gravity
 
-    if jump and playerY == win_height - playerSize:
-        # If we're not already jumping, max out the y velocity
-        player_vy = maxjump_vy
-
-    # Did we switch direction?
+    # Did we switch direction along the x axis?
     if (direction > 0 and player_vx < 0) or (direction < 0 and player_vx > 0):
         player_vx = move_speed * direction
 
-    # Move the player
+    # Move the player along the x axis
     if direction != 0:
-        playerX += player_vx
+        player_x += player_vx
     
-    # Keep the player within the screen bounds
-    if playerX > win_width - playerSize:
-        playerX = win_width - playerSize
-    if playerX < 0:
-        playerX = 0
+    # Keep the player within the screen bounds along the x axis
+    if player_x > win_width - playerSize:
+        player_x = win_width - playerSize
+    if player_x < 0:
+        player_x = 0
+
+    # If we're not already jumping, max out the y velocity
+    if jump and player_y == win_height - playerSize:
+        player_vy = maxjump_vy
 
     if player_vy > 1.0: # Decrease speed throughout the jump
         player_vy = player_vy * 0.9
@@ -49,16 +49,17 @@ def move(direction, jump):
 
     # Is our square in the air? 
     # Better add some gravity to bring it back down!
-    if playerY < win_height - playerSize:
-        playerY += gravity
+    if player_y < win_height - playerSize:
+        player_y += gravity
         gravity = gravity * 1.1
     else: # Reset gravity so it starts at 1.0 next time we jump
         gravity = 1.0
     
-    playerY -= player_vy
+    # Move the player along the y axis
+    player_y -= player_vy
 
     # Don't let the player fall through the floor
-    playerY = min(playerY, win_height - playerSize)
+    player_y = min(player_y, win_height - playerSize)
 
     # Increase x velocity if we're moving but not yet at the maximum
     if direction and abs(player_vx) < max_vx:
@@ -75,19 +76,23 @@ while True:
 
     surface.fill((0,0,0))
 
-    pygame.draw.rect(surface, (255,0,0), (playerX, playerY, playerSize, playerSize))
+    pygame.draw.rect(surface, (255,0,0), (player_x, player_y, playerSize, playerSize))
 
     # Get a list of all events that happened since 
     # the last redraw
+    jump = False
     for event in pygame.event.get():
 
-        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN 
-                                         and event.key == pygame.K_ESCAPE):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                quitGame()
+            if event.key == pygame.K_UP:
+                jump = True
+
+        if event.type == pygame.QUIT:
             quitGame()
 
     pressed_keys = pygame.key.get_pressed()            
-    jump = pressed_keys[pygame.K_UP]
-
     if pressed_keys[pygame.K_LEFT]:
         move(-1, jump)
     elif pressed_keys[pygame.K_RIGHT]:
