@@ -75,6 +75,7 @@ def quitGame():
     raise SystemExit
 
 joystick = None
+joy_threshold = 0.05
 if pygame.joystick.get_count() > 0:
     joystick = pygame.joystick.Joystick(0)
 
@@ -100,11 +101,11 @@ while True:
 
     if joystick:
         x_axis = joystick.get_axis(0)
-        if abs(x_axis) <= 0.05:
+        if abs(x_axis) <= joy_threshold:
             move(0,jump)
-        elif x_axis > .5:
+        elif x_axis > joy_threshold:
             move(1, jump)
-        elif x_axis <= .5:
+        elif x_axis <= -joy_threshold:
             move(-1, jump)
 
     else:
