@@ -78,11 +78,10 @@ while True:
 
     surface.fill((0,0,0))
 
-    # Get a list of all events that happened since 
-    # the last redraw
     jump = False
-    for event in pygame.event.get():
 
+    # Get all events since the last redraw
+    for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 quitGame()
