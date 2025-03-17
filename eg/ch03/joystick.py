@@ -89,6 +89,8 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 quitGame()
+            if event.key == pygame.K_UP:
+                jump = True
 
         if event.type == pygame.JOYBUTTONDOWN:
             jump = True
