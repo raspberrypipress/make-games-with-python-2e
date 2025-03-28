@@ -109,15 +109,20 @@ class Floor(pygame.sprite.Sprite):
 
 
 def movePlatforms(platforms):
-    for p in platforms: # Keep the platforms moving
+    global last_platform, platform_delay, score
+    for p in platforms:
         p.move()
-        # Add a new platform when one is halfway up the screen
-        if p.rect.topleft[1] == int(win_height/2): 
+        # Add a new platform when it's time
+        elapsed = pygame.time.get_ticks() - last_platform
+        if elapsed > platform_delay:
             new_platform = Platform()
             platforms.add(new_platform)
+            platform_delay = max(800, platform_delay - 50)
+            last_platform = pygame.time.get_ticks()
 
         # Destroy platforms when they move offscreen
         if p.rect.bottomleft[1] <= 0:
+            score = score + 1 # You earned a point!
             p.kill()
             del p
 
@@ -128,16 +133,17 @@ def check_game_over(player):
         game_started = False
 
 def restartGame():
-    global platforms, player, floor
+    global platforms, player, floor, last_platform, platform_delay
     platforms = pygame.sprite.Group()
     platforms.add(Platform())
     player = Player()
     floor = Floor()
-
+    last_platform = pygame.time.get_ticks()
+    platform_delay = 2000
 
 game_started = False
 game_ended = False
-
+score = 0
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
