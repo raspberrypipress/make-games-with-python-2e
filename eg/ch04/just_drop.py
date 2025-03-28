@@ -13,9 +13,6 @@ win_height = 600
 window = pygame.display.set_mode((win_width, win_height))
 pygame.display.set_caption('Drop!')
 
-game_started = False
-game_ended = False
-
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -28,7 +25,8 @@ class Player(pygame.sprite.Sprite):
         self.surf = pygame.Surface((10, 25))
         self.surf.fill((255, 0, 0))
 
-        self.mask = pygame.mask.from_surface(self.surf) # Collision mask
+        # Create a collision mask
+        self.mask = pygame.mask.from_surface(self.surf) 
         self.rect = self.surf.get_rect()
         self.rect.midbottom = (self.x, self.y)
 
@@ -36,7 +34,7 @@ class Player(pygame.sprite.Sprite):
         self.x += direction * self.speed_x
         self.y += self.gravity
          
-        if self.x > win_width: # FIXME: in the text, explain how to do the same for y so they get a reward for reaching the bottom of the screen (back to the top)
+        if self.x > win_width:
             self.x = 0
         if self.x < 0:
             self.x = win_width
@@ -48,7 +46,8 @@ class Player(pygame.sprite.Sprite):
         hits = pygame.sprite.spritecollide(self, platforms, 
                 False, collided=pygame.sprite.collide_mask)
         if hits:
-            self.y = hits[0].rect.top + 1 # The +1 to maintain collision condition, so we don't hop.
+            # The +1 maintains a collision condition, so we don't hop.
+            self.y = hits[0].rect.top + 1
             self.gravity = 0
         elif pygame.sprite.collide_rect(self, floor):
             self.y = floor.rect.top + 1
@@ -65,15 +64,19 @@ class Platform(pygame.sprite.Sprite):
         self.y = win_height
         self.speed = 2
 
-        self.surf = pygame.Surface((win_width, 20), pygame.SRCALPHA)
+        self.surf = pygame.Surface((win_width, 20), 
+                                   pygame.SRCALPHA)
         self.surf.fill((255, 255, 255, 0))
 
         gap_loc = random.randint(0, win_width-50)
-        pygame.draw.rect(self.surf, (255,255,255,255), (0, 0, gap_loc, 20))
         pygame.draw.rect(self.surf, (255,255,255,255), 
-                         (gap_loc + 50, 0, win_width - gap_loc - 50, 20))
+                         (0, 0, gap_loc, 20))
+        pygame.draw.rect(self.surf, (255,255,255,255), 
+                         (gap_loc + 50, 0, 
+                          win_width - gap_loc - 50, 20))
 
-        self.mask = pygame.mask.from_surface(self.surf) # Collision mask
+        # Create a collision mask
+        self.mask = pygame.mask.from_surface(self.surf)
         # Scale it so we ignore collisions halfway through the gap
         self.mask= self.mask.scale((self.surf.get_width(),
                                     self.surf.get_height() * .5))
@@ -96,7 +99,8 @@ class Floor(pygame.sprite.Sprite):
         self.surf = pygame.Surface((win_height, 4))
         self.surf.fill((255, 0, 255))
 
-        self.mask = pygame.mask.from_surface(self.surf) # Collision mask
+        # Create a collision mask
+        self.mask = pygame.mask.from_surface(self.surf) 
         self.rect = self.surf.get_rect()
         self.rect.center = (self.x, self.y)
 
@@ -123,7 +127,6 @@ def check_game_over(player):
         game_ended = True
         game_started = False
 
-
 def restartGame():
     global platforms, player, floor
     platforms = pygame.sprite.Group()
@@ -131,6 +134,9 @@ def restartGame():
     player = Player()
     floor = Floor()
 
+
+game_started = False
+game_ended = False
 
 while True:
     for event in pygame.event.get():
