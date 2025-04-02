@@ -71,17 +71,12 @@ class Platform(pygame.sprite.Sprite):
 
         self.image = pygame.Surface((win_width, 20), 
                                     pygame.SRCALPHA)
-        # self.image.fill((255, 255, 255, 0))
-        self.image.fill((255, 255, 255, 255))
+        self.image.fill((255, 255, 255, 255)) # solid platform
 
+        # Draw a gap
         gap_loc = random.randint(0, win_width-50)
         pygame.draw.rect(self.image, (255,255,255,0), 
                          (gap_loc, 0, 50, 20))
-        # pygame.draw.rect(self.image, (255,255,255,255), 
-        #                  (0, 0, gap_loc, 20))
-        # pygame.draw.rect(self.image, (255,255,255,255), 
-        #                  (gap_loc + 50, 0, 
-        #                   win_width - gap_loc - 50, 20))
 
         # Create a collision mask
         self.mask = pygame.mask.from_surface(self.image)
