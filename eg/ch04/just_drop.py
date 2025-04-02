@@ -71,17 +71,19 @@ class Platform(pygame.sprite.Sprite):
 
         self.image = pygame.Surface((win_width, 20), 
                                     pygame.SRCALPHA)
-        self.image.fill((255, 255, 255, 0))
+        # self.image.fill((255, 255, 255, 0))
+        self.image.fill((255, 255, 255, 255))
 
         gap_loc = random.randint(0, win_width-50)
-        pygame.draw.rect(self.image, (255,255,255,255), 
-                         (0, 0, gap_loc, 20))
-        pygame.draw.rect(self.image, (255,255,255,255), 
-                         (gap_loc + 50, 0, 
-                          win_width - gap_loc - 50, 20))
+        pygame.draw.rect(self.image, (255,255,255,0), 
+                         (gap_loc, 0, 50, 20))
+        # pygame.draw.rect(self.image, (255,255,255,255), 
+        #                  (0, 0, gap_loc, 20))
+        # pygame.draw.rect(self.image, (255,255,255,255), 
+        #                  (gap_loc + 50, 0, 
+        #                   win_width - gap_loc - 50, 20))
 
         # Create a collision mask
-        # FIXME: explain in the text that the mask not only follows the rectangle, but respects any gaps in the object.
         self.mask = pygame.mask.from_surface(self.image)
         # Scale it so we ignore collisions halfway through the gap
         self.mask= self.mask.scale((self.image.get_width(),
