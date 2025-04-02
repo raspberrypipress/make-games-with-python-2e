@@ -88,7 +88,7 @@ class Platform(pygame.sprite.Sprite):
         self.rect.center = (self.x, self.y)
 
     def update(self):
-        self.y -= self.speed    
+        self.y = self.y - self.speed    
         self.rect.center = (self.x, self.y)
 
 
