@@ -47,18 +47,18 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.midbottom = (self.x, self.y)
     
-    def check_collisions(self, platforms, floor):
+    def check_collisions(self, platforms):
         # Check for collisions with all platforms
         hits = pygame.sprite.spritecollide(self, platforms, 
                 False, collided=pygame.sprite.collide_mask)
         if hits:
             self.gravity = 0
             self.y = hits[0].rect.top + 1
-        elif pygame.sprite.collide_rect(self, floor):
+        elif self.y >= win_height:
             self.gravity = 0
-            self.y = floor.rect.top + 1
+            self.y = win_height + 1
         else:
-            self.gravity = 1
+            self.gravity = 2
 
 
 class Platform(pygame.sprite.Sprite):
@@ -95,22 +95,6 @@ class Platform(pygame.sprite.Sprite):
         self.rect.center = (self.x, self.y)
 
 
-class Floor(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-
-        self.x = win_width/2
-        self.y = win_height - 10
-
-        self.image = pygame.Surface((win_height, 4))
-        self.image.fill((255, 0, 255))
-
-        # Create a collision mask
-        self.mask = pygame.mask.from_surface(self.image) 
-        self.rect = self.image.get_rect()
-        self.rect.center = (self.x, self.y)
-
-
 def movePlatforms(platforms):
     global last_ticks, platform_delay, score
     for p in platforms:
@@ -137,11 +121,10 @@ def check_game_over(player):
         game_started = False
 
 def restartGame():
-    global platforms, player, floor, last_ticks, platform_delay
+    global platforms, player, last_ticks, platform_delay
     platforms = pygame.sprite.Group()
     platforms.add(Platform())
     player = Player()
-    floor = Floor()
     last_ticks = pygame.time.get_ticks()
     platform_delay = 2000
 
@@ -173,11 +156,10 @@ while True:
         player.update()
         movePlatforms(platforms)
 
-        player.check_collisions(platforms, floor)
+        player.check_collisions(platforms)
         check_game_over(player)
 
         platforms.draw(window)
-        window.blit(floor.image, floor.rect)
         window.blit(player.image, player.rect)
 
     elif game_ended:
