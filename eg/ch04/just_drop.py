@@ -90,18 +90,14 @@ class Platform(pygame.sprite.Sprite):
     def update(self):
         self.y = self.y - self.speed    
         self.rect.center = (self.x, self.y)
+        # Destroy platforms when they move offscreen
+        if self.rect.bottomleft[1] <= 0:
+            self.kill()
 
 
 def movePlatforms(platforms):
-    global last_ticks, platform_delay, score
-    for p in platforms:
-        p.update()
-
-        # Destroy platforms when they move offscreen
-        if p.rect.bottomleft[1] <= 0:
-            score = score + 1 # You earned a point!
-            p.kill()
-            del p
+    global last_ticks, platform_delay
+    platforms.update()
 
     # Add a new platform when it's time
     elapsed = pygame.time.get_ticks() - last_ticks
@@ -127,7 +123,6 @@ def restartGame():
 
 game_started = False
 game_ended = False
-score = 0
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
