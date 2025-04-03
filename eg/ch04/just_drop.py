@@ -95,7 +95,7 @@ class Platform(pygame.sprite.Sprite):
             self.kill()
 
 
-def restartGame():
+def restart_game():
     global platforms, player, platform_delay, game_started
     platforms = pygame.sprite.Group()
     player = Player()
@@ -133,7 +133,7 @@ while True:
         direction = 1
     elif pressed_keys[pygame.K_SPACE]:
         if not game_started:
-            restartGame()
+            restart_game()
 
     if game_started: # Move, check collisions, and draw sprites
         player.set_direction(direction)
