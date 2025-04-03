@@ -96,12 +96,12 @@ class Platform(pygame.sprite.Sprite):
 
 
 def restartGame():
-    global platforms, player, platform_delay
+    global platforms, player, platform_delay, game_started
     platforms = pygame.sprite.Group()
-    platforms.add(Platform())
     player = Player()
     platform_delay = 2000
-    pygame.time.set_timer(NEW_PLATFORM, platform_delay)    
+    pygame.time.set_timer(NEW_PLATFORM, platform_delay)
+    game_started = True
 
 def check_game_over(player):
     global game_ended, game_started
@@ -134,7 +134,6 @@ while True:
     elif pressed_keys[pygame.K_SPACE]:
         if not game_started:
             restartGame()
-            game_started = True
 
     if game_started: # Move, check collisions, and draw sprites
         player.set_direction(direction)
