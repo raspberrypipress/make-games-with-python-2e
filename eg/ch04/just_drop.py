@@ -96,23 +96,12 @@ class Platform(pygame.sprite.Sprite):
 
 
 def restartGame():
-    global platforms, player, last_ticks, platform_delay
+    global platforms, player, platform_delay
     platforms = pygame.sprite.Group()
     platforms.add(Platform())
     player = Player()
-    last_ticks = pygame.time.get_ticks()
     platform_delay = 2000
-
-def movePlatforms(platforms):
-    global last_ticks, platform_delay
-    platforms.update()
-
-    # Add a new platform when it's time
-    elapsed = pygame.time.get_ticks() - last_ticks
-    if elapsed > platform_delay:
-        platforms.add(Platform())
-        platform_delay = max(800, platform_delay - 50)
-        last_ticks = pygame.time.get_ticks()
+    pygame.time.set_timer(NEW_PLATFORM, platform_delay)    
 
 def check_game_over(player):
     global game_ended, game_started
@@ -122,11 +111,16 @@ def check_game_over(player):
 
 game_started = False
 game_ended = False
+NEW_PLATFORM = pygame.USEREVENT + 0
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
+        if event.type == NEW_PLATFORM:
+            platforms.add(Platform())
+            platform_delay = max(800, platform_delay - 50)
+            pygame.time.set_timer(NEW_PLATFORM, platform_delay)
      
     window.fill((0, 0, 0))
  
@@ -145,7 +139,7 @@ while True:
     if game_started: # Move, check collisions, and draw sprites
         player.set_direction(direction)
         player.update()
-        movePlatforms(platforms)
+        platforms.update()
 
         player.check_collisions(platforms)
         check_game_over(player)
