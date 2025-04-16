@@ -9,164 +9,182 @@ windowHeight = 768
 
 pygame.init()
 clock = pygame.time.Clock()
-surface = pygame.display.set_mode((windowWidth, windowHeight), pygame.FULLSCREEN)
+# surface = pygame.display.set_mode((windowWidth, windowHeight), pygame.FULLSCREEN)
+surface = pygame.display.set_mode((windowWidth, windowHeight))
 
 pygame.display.set_caption('Solar System Simulator')
 
-previousMousePosition = [0,0]
-mousePosition = None
+prev_mouse_pos = [0,0]
+mouse_pos = None
 mouseDown = False
 
 background = pygame.image.load("assets/background.jpg")
 logo = pygame.image.load("assets/logo.png")
 UITab = pygame.image.load("assets/tabs.png")
-uitab_x = 131
-x = uitab_x + 1
+
+uitab_coords = (131, 687)
+x = uitab_coords[0] + 1
 UICoordinates = []
 for name in solarsystem.images.keys():
-	UICoordinates.append({"name": name, "coordinates": (x, 687)})
-	x += 97
+    UICoordinates.append({"name": name,
+                          "coords": (x, uitab_coords[1])})
+    x += 97
 
 planets = []
 currentBody = None
-
 drawAttractions = True
-
 gravity = 10.0
 
 def drawUI():
-	surface.blit(UITab, (uitab_x,687))
-	# [round(687+(82-solarsystem.images[x].get_rect()[3])/2) for x in solarsystem.images]
-	surface.blit(solarsystem.images["mercury"], (158,714))
-	surface.blit(solarsystem.images["venus"], (247,706))
-	surface.blit(solarsystem.images["earth"], (344,704))
-	surface.blit(solarsystem.images["mars"], (451,714))
-	surface.blit(solarsystem.images["jupiter"], (524,692))
-	surface.blit(solarsystem.images["saturn"], (620,695))
-	surface.blit(solarsystem.images["neptune"], (724,697))
-	surface.blit(solarsystem.images["uranus"], (822,697))
+    surface.blit(UITab, uitab_coords)
+    x = uitab_coords[0]
+    for p in solarsystem.planets:
+        rect = pygame.Rect(x, uitab_coords[1], 82, 82)
+        img = solarsystem.images[p["name"]]
+        surface.blit(img, img.get_rect(center=rect.center))
+        x += 97
+
+def drawBody(body):
+    surface.blit(solarsystem.images[body["name"]], 
+                 (body["pos"][0] - body["radius"],
+                  body["pos"][1] - body["radius"]))
 
 def drawPlanets():
 
-	for planet in planets:
-		planet["pos"][0] += planet["velocity"][0]
-		planet["pos"][1] += planet["velocity"][1]
-		surface.blit(solarsystem.images[planet["name"]], (planet["pos"][0] - planet["radius"], planet["pos"][1] - planet["radius"]))
+    for p in planets:
+        p["pos"][0] += p["velocity"][0]
+        p["pos"][1] += p["velocity"][1]
+        drawBody(p)
 
 def drawCurrentBody():
-
-	currentBody["pos"][0] = mousePosition[0]
-	currentBody["pos"][1] = mousePosition[1]
-
-	surface.blit(solarsystem.images[currentBody["name"]], (currentBody["pos"][0] - currentBody["radius"], currentBody["pos"][1] - currentBody["radius"]))
+    currentBody["pos"] = list(mouse_pos)
+    drawBody(currentBody)
 
 def calculateMovement():
 
-	for p in planets:
+    for p in planets:
 
-		other_planets = [x for x in planets if x is not p]
-		for op in other_planets:
-				
-			direction = (op["pos"][0] - p["pos"][0], op["pos"][1] - p["pos"][1]) # The difference in the X, Y coordinates of the objects
-			magnitude = math.hypot(op["pos"][0] - p["pos"][0], op["pos"][1] - p["pos"][1]) # The distance between the two objects
-			nDirection = (direction[0] / magnitude, direction[1] / magnitude) # Normalised Vector pointing in the direction of the force
+        other_planets = [x for x in planets if x is not p]
+        for op in other_planets:
+                
+            # Difference in the X,Y coordinates of the objects
+            direction = (op["pos"][0] - p["pos"][0], 
+                         op["pos"][1] - p["pos"][1]) 
+            # Distance between the two objects
+            magnitude = math.hypot(op["pos"][0] - p["pos"][0],
+                                   op["pos"][1] - p["pos"][1])
+            # Normalised Vector pointing in the
+            # direction of the force
+            nDirection = (direction[0] / magnitude,
+                          direction[1] / magnitude)
 
-			## We need to limit the gravity to stop things flying off to infinity... and beyond!
-			if magnitude < 5:
-				magnitude = 5
-			elif magnitude > 30:
-				magnitude = 30
+            # We need to limit the gravity to stop things 
+			# flying off to infinity... and beyond!
+            if magnitude < 5:
+                magnitude = 5
+            elif magnitude > 30:
+                magnitude = 30
 
-			strength = ((gravity * p["mass"] * op["mass"]) / (magnitude * magnitude)) / op["mass"] # How strong should the attraction be?
+			# How strong should the attraction be?
+            strength = ((gravity * p["mass"] * op["mass"]) /
+                        (magnitude * magnitude)) / op["mass"]
 
-			appliedForce = (nDirection[0] * strength, nDirection[1] * strength)
+            appliedForce = (nDirection[0] * strength, 
+                            nDirection[1] * strength)
 
-			op["velocity"][0] -= appliedForce[0]
-			op["velocity"][1] -= appliedForce[1]
+            op["velocity"][0] -= appliedForce[0]
+            op["velocity"][1] -= appliedForce[1]
 
-			if drawAttractions is True:
-				pygame.draw.line(surface, (255,255,255), (p["pos"][0],p["pos"][1]), (op["pos"][0],op["pos"][1]), 1)
+            if drawAttractions is True:
+                pygame.draw.line(surface, (255,255,255), 
+                                 (p["pos"][0], p["pos"][1]),
+                                 (op["pos"][0], op["pos"][1]),
+                                 1)
 
 def checkUIForClick(coordinates):
 
-	for tab in UICoordinates:
-		tabX = tab["coordinates"][0]
+    for tab in UICoordinates:
+        tabX = tab["coords"][0]
 
-		if coordinates[0] > tabX and coordinates[0] < tabX + 82:
-			return tab["name"]
+        if coordinates[0] > tabX and coordinates[0] < tabX + 82:
+            return tab["name"]
 
-	return False
+    return False
 
 def handleMouseDown():
-	global mousePosition, currentBody
+    global mouse_pos, currentBody
 
-	if(mousePosition[1] >= 687):
-		newPlanet = checkUIForClick(mousePosition)
+    if(mouse_pos[1] >= uitab_coords[1]):
+        newPlanet = checkUIForClick(mouse_pos)
 
-		if newPlanet is not False:
-			currentBody = solarsystem.makeNewPlanet(newPlanet)
-
+        if newPlanet:
+            currentBody = solarsystem.makeNewPlanet(newPlanet)
 
 def quitGame():
-	pygame.quit()
-	sys.exit()
+    pygame.quit()
+    sys.exit()
 
-# 'main' loop
+# main loop
 while True:
 
-	mousePosition = pygame.mouse.get_pos()
-	surface.blit(background, (0,0))
+    mouse_pos = pygame.mouse.get_pos()
+    surface.blit(background, (0,0))
 
-	# Handle user and system events 
-	for event in GAME_EVENTS.get():
+    # Handle user and system events 
+    for event in GAME_EVENTS.get():
 
-		if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                quitGame()
 
-			if event.key == pygame.K_ESCAPE:
-				quitGame()
+        if event.type == pygame.KEYUP:
 
-		if event.type == pygame.KEYUP:
+            if event.key == pygame.K_r:
+                planets = []
+            if event.key == pygame.K_a:
+                if drawAttractions is True:
+                    drawAttractions = False
+                elif drawAttractions is False:
+                    drawAttractions = True
 
-			if event.key == pygame.K_r:
-				planets = []
-			if event.key == pygame.K_a:
-				if drawAttractions is True:
-					drawAttractions = False
-				elif drawAttractions is False:
-					drawAttractions = True
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouseDown = True
+            handleMouseDown()
 
-		if event.type == pygame.MOUSEBUTTONDOWN:
-			mouseDown = True
-			handleMouseDown()
+        if event.type == pygame.MOUSEBUTTONUP:
+            mouseDown = False
 
-		if event.type == pygame.MOUSEBUTTONUP:
-			mouseDown = False
+        if event.type == GAME_GLOBALS.QUIT:
+            quitGame()
 
-		if event.type == GAME_GLOBALS.QUIT:
-			quitGame()
+    # Draw the UI, update the movement of the planets,
+	# then draw the planets in their new positions.
+    drawUI()
+    calculateMovement()
+    drawPlanets()
 
-	# Draw the UI; Update the movement of the planets; Draw the planets in their new positions.
-	drawUI()
-	calculateMovement()
-	drawPlanets()
+    # If our user has created a new planet,
+	# draw it where the mouse is.
+    if currentBody is not None:
+        drawCurrentBody()
 
-	# If our user has created a new planet, draw it where the mouse is
-	if currentBody is not None:
-		drawCurrentBody()
+        # If they've released the mouse, add the new planet to
+		# the planets list and let gravity do its thing
+        if mouseDown is False:
+            currentBody["velocity"][0] = (
+                mouse_pos[0] - prev_mouse_pos[0]) / 4
+            currentBody["velocity"][1] = (
+                mouse_pos[1] - prev_mouse_pos[1]) / 4
+            planets.append(currentBody)
+            currentBody = None
 
-		# If our user has released the mouse, add the new planet to the planets list and let gravity do its thing
-		if mouseDown is False:
-			currentBody["velocity"][0] = (mousePosition[0] - previousMousePosition[0]) / 4
-			currentBody["velocity"][1] = (mousePosition[1] - previousMousePosition[1]) / 4
-			planets.append(currentBody)
-			currentBody = None
+    # Draw the logo for the first four seconds of the program
+    if GAME_TIME.get_ticks() < 4000:
+        surface.blit(logo, (108,77))
 
-	# Draw the logo for the first four seconds of the program
-	if GAME_TIME.get_ticks() < 4000:
-		surface.blit(logo, (108,77))
+    # Store the previous mouse coordinates to create a vector
+	# when we release a new planet
+    prev_mouse_pos = mouse_pos
 
-	# Store the previous mouse coordinates to create a vector when we release a new planet
-	previousMousePosition = mousePosition
-
-	clock.tick(60)
-	pygame.display.update()
+    clock.tick(60)
+    pygame.display.update()
