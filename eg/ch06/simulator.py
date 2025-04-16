@@ -1,5 +1,4 @@
 import pygame, sys, random, math
-import pygame.locals as GAME_GLOBALS
 import pygame.event as GAME_EVENTS
 import pygame.time as GAME_TIME
 import solarsystem
@@ -16,7 +15,6 @@ pygame.display.set_caption('Solar System Simulator')
 
 prev_mouse_pos = [0,0]
 mouse_pos = None
-mouseDown = False
 
 background = pygame.image.load("assets/background.jpg")
 logo = pygame.image.load("assets/logo.png")
@@ -137,25 +135,19 @@ while True:
             if event.key == pygame.K_ESCAPE:
                 quitGame()
 
+        # FIXME: explain why we use KEYUP here instead of get_pressed()
         if event.type == pygame.KEYUP:
-
             if event.key == pygame.K_r:
                 planets = []
             if event.key == pygame.K_a:
-                if drawAttractions is True:
-                    drawAttractions = False
-                elif drawAttractions is False:
-                    drawAttractions = True
+                drawAttractions = not drawAttractions
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouseDown = True
-            handleMouseDown()
-
-        if event.type == pygame.MOUSEBUTTONUP:
-            mouseDown = False
-
-        if event.type == GAME_GLOBALS.QUIT:
+        if event.type == pygame.QUIT:
             quitGame()
+
+    pressed = pygame.mouse.get_pressed()[0]
+    if pressed:
+        handleMouseDown()
 
     # Draw the UI, update the movement of the planets,
 	# then draw the planets in their new positions.
@@ -165,12 +157,12 @@ while True:
 
     # If our user has created a new planet,
 	# draw it where the mouse is.
-    if currentBody is not None:
+    if currentBody:
         drawCurrentBody()
 
         # If they've released the mouse, add the new planet to
 		# the planets list and let gravity do its thing
-        if mouseDown is False:
+        if not pressed:
             currentBody["velocity"][0] = (
                 mouse_pos[0] - prev_mouse_pos[0]) / 4
             currentBody["velocity"][1] = (
