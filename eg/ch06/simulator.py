@@ -1,5 +1,4 @@
 import pygame, sys, random, math
-import pygame.event as GAME_EVENTS
 import pygame.time as GAME_TIME
 import solarsystem
 
@@ -64,13 +63,18 @@ def calculateMovement():
 
         other_planets = [x for x in planets if x is not p]
         for op in other_planets:
-                
+            
+            # FIXME: Use Vector2!!!!!!
             # Difference in the X,Y coordinates of the objects
             direction = (op["pos"][0] - p["pos"][0], 
                          op["pos"][1] - p["pos"][1]) 
+            direction2 = pygame.math.Vector2(op["pos"]) - pygame.math.Vector2(p["pos"])
+            print(direction, direction2)
             # Distance between the two objects
             magnitude = math.hypot(op["pos"][0] - p["pos"][0],
                                    op["pos"][1] - p["pos"][1])
+            magnitude2 = pygame.math.Vector2(op["pos"]).distance_to(pygame.math.Vector2(p["pos"]))
+            print(magnitude, magnitude2)
             # Normalised Vector pointing in the
             # direction of the force
             nDirection = (direction[0] / magnitude,
@@ -125,11 +129,8 @@ def quitGame():
 # main loop
 while True:
 
-    mouse_pos = pygame.mouse.get_pos()
-    surface.blit(background, (0,0))
-
     # Handle user and system events 
-    for event in GAME_EVENTS.get():
+    for event in pygame.event.get():
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -145,6 +146,9 @@ while True:
         if event.type == pygame.QUIT:
             quitGame()
 
+    surface.blit(background, (0,0))
+
+    mouse_pos = pygame.mouse.get_pos()
     pressed = pygame.mouse.get_pressed()[0]
     if pressed:
         handleMouseDown()
