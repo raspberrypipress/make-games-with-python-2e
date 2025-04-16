@@ -20,7 +20,12 @@ mouseDown = False
 background = pygame.image.load("assets/background.jpg")
 logo = pygame.image.load("assets/logo.png")
 UITab = pygame.image.load("assets/tabs.png")
-UICoordinates = [{"name" : "mercury", "coordinates" : (132,687)}, {"name" : "venus", "coordinates" : (229,687)}, {"name" : "earth", "coordinates" : (326,687)}, {"name" : "mars", "coordinates" : (423,687)}, {"name" : "jupiter", "coordinates" : (520,687)}, {"name" : "saturn", "coordinates" : (617,687)}, {"name" : "neptune", "coordinates" : (713,687)}, {"name" : "uranus", "coordinates" : (810,687)}]
+uitab_x = 131
+x = uitab_x + 1
+UICoordinates = []
+for name in solarsystem.images.keys():
+	UICoordinates.append({"name": name, "coordinates": (x, 687)})
+	x += 97
 
 planets = []
 currentBody = None
@@ -30,7 +35,8 @@ drawAttractions = True
 gravity = 10.0
 
 def drawUI():
-	surface.blit(UITab, (131,687))
+	surface.blit(UITab, (uitab_x,687))
+	# [round(687+(82-solarsystem.images[x].get_rect()[3])/2) for x in solarsystem.images]
 	surface.blit(solarsystem.images["mercury"], (158,714))
 	surface.blit(solarsystem.images["venus"], (247,706))
 	surface.blit(solarsystem.images["earth"], (344,704))
