@@ -71,13 +71,13 @@ def calculateMovement():
             nDirection = direction / magnitude
 
             # We need to limit the gravity to stop things 
-			# flying off to infinity... and beyond!
+            # flying off to infinity... and beyond!
             if magnitude < 5:
                 magnitude = 5
             elif magnitude > 30:
                 magnitude = 30
 
-			# How strong should the attraction be?
+            # How strong should the attraction be?
             strength = ((gravity * p["mass"] * op["mass"]) /
                         (magnitude * magnitude)) / op["mass"]
 
@@ -146,18 +146,18 @@ while True:
     surface.blit(background, (0,0))
 
     # Draw the UI, update the movement of the planets,
-	# then draw the planets in their new positions.
+    # then draw the planets in their new positions.
     drawUI()
     calculateMovement()
     drawPlanets()
 
     # If our user has created a new planet,
-	# draw it where the mouse is.
+    # draw it where the mouse is.
     if currentBody:
         drawCurrentBody()
 
         # If they've released the mouse, add the new planet to
-		# the planets list and let gravity do its thing
+        # the planets list and let gravity do its thing
         if not pressed:
             v = (mouse_pos - prev_mouse_pos) / 4
             currentBody["velocity"] = v
@@ -169,7 +169,7 @@ while True:
         surface.blit(logo, (108,77))
 
     # Store the previous mouse coordinates to create a vector
-	# when we release a new planet
+    # when we release a new planet
     prev_mouse_pos = mouse_pos
 
     clock.tick(60)
