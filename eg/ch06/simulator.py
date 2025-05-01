@@ -1,61 +1,60 @@
-import pygame, sys, math
+import pygame, sys
 import solarsystem
 from pygame.math import Vector2
 
-windowWidth = 1024
-windowHeight = 768
-
 pygame.init()
 clock = pygame.time.Clock()
-# surface = pygame.display.set_mode((windowWidth, windowHeight), pygame.FULLSCREEN)
-surface = pygame.display.set_mode((windowWidth, windowHeight))
+fps = 60
 
+win_width = 1024
+win_height = 768
+window = pygame.display.set_mode((win_width, win_height))
 pygame.display.set_caption('Solar System Simulator')
-
-prev_mouse_pos = Vector2()
-mouse_pos = None
 
 background = pygame.image.load("assets/background.jpg")
 logo = pygame.image.load("assets/logo.png")
-UITab = pygame.image.load("assets/tabs.png")
+uitab = pygame.image.load("assets/tabs.png")
 
-uitab_coords = (131, 687)
-x = uitab_coords[0] + 1
-UICoordinates = []
+# Draw the user interface
+ui_spacing = 97
+uitab_upperleft = (131, 687)
+x = uitab_upperleft[0] + 1
+ui_coordinates = []
 for name in solarsystem.images.keys():
-    UICoordinates.append({"name": name,
-                          "coords": (x, uitab_coords[1])})
-    x += 97
+    ui_coordinates.append({"name": name,
+                           "coords": (x, uitab_upperleft[1])})
+    x += ui_spacing
 
+prev_mouse_pos = Vector2()
+mouse_pos = None
 planets = []
-currentBody = None
-drawAttractions = True
+current_body = None
+draw_attractions = True
 gravity = 10.0
 
-def drawUI():
-    surface.blit(UITab, uitab_coords)
-    x = uitab_coords[0]
+def draw_ui():
+    window.blit(uitab, uitab_upperleft)
+    x = uitab_upperleft[0]
     for p in solarsystem.planets:
-        rect = pygame.Rect(x, uitab_coords[1], 82, 82)
+        rect = pygame.Rect(x, uitab_upperleft[1], 82, 82)
         img = solarsystem.images[p["name"]]
-        surface.blit(img, img.get_rect(center=rect.center))
-        x += 97
+        window.blit(img, img.get_rect(center=rect.center))
+        x += ui_spacing
 
-def drawBody(body):
-    surface.blit(solarsystem.images[body["name"]], 
+def draw_body(body):
+    window.blit(solarsystem.images[body["name"]], 
                  body["pos"] - Vector2(body["radius"]))
 
-def drawPlanets():
-
+def draw_planets():
     for p in planets:
         p["pos"] += p["velocity"]
-        drawBody(p)
+        draw_body(p)
 
-def drawCurrentBody():
-    currentBody["pos"] = mouse_pos
-    drawBody(currentBody)
+def draw_current_body():
+    current_body["pos"] = mouse_pos
+    draw_body(current_body)
 
-def calculateMovement():
+def calculate_movement():
 
     for p in planets:
 
@@ -68,7 +67,7 @@ def calculateMovement():
             magnitude = op["pos"].distance_to(p["pos"])
             # Normalised Vector pointing in the
             # direction of the force
-            nDirection = direction / magnitude
+            n_direction = direction / magnitude
 
             # We need to limit the gravity to stop things 
             # flying off to infinity... and beyond!
@@ -81,19 +80,20 @@ def calculateMovement():
             strength = ((gravity * p["mass"] * op["mass"]) /
                         (magnitude * magnitude)) / op["mass"]
 
-            appliedForce = nDirection * Vector2(strength)
+            print(n_direction, op["pos"] - op["pos"].move_towards(p["pos"], 1))
 
-            op["velocity"] -= Vector2(appliedForce)
+            applied_force = n_direction * Vector2(strength)
 
-            if drawAttractions is True:
-                pygame.draw.line(surface, (255,255,255), 
+            op["velocity"] -= Vector2(applied_force)
+            if draw_attractions:
+                pygame.draw.line(window, (255,255,255), 
                                  p["pos"],
                                  op["pos"],
                                  1)
 
-def checkUIForClick(coordinates):
+def check_ui_for_click(coordinates):
 
-    for tab in UICoordinates:
+    for tab in ui_coordinates:
         tabX = tab["coords"][0]
 
         if coordinates[0] > tabX and coordinates[0] < tabX + 82:
@@ -101,14 +101,14 @@ def checkUIForClick(coordinates):
 
     return False
 
-def handleMouseDown():
-    global currentBody
+def handle_mouse_down():
+    global current_body
 
-    if(mouse_pos[1] >= uitab_coords[1]):
-        newPlanet = checkUIForClick(mouse_pos)
+    if(mouse_pos[1] >= uitab_upperleft[1]):
+        new_planet = check_ui_for_click(mouse_pos)
 
-        if newPlanet:
-            currentBody = solarsystem.makeNewPlanet(newPlanet)
+        if new_planet:
+            current_body = solarsystem.make_new_planet(new_planet)
 
 def quitGame():
     pygame.quit()
@@ -130,12 +130,12 @@ while True:
             if event.key == pygame.K_r:
                 planets = []
             if event.key == pygame.K_a:
-                drawAttractions = not drawAttractions
+                draw_attractions = not draw_attractions
 
         mouse_pos = Vector2(pygame.mouse.get_pos())
         if event.type == pygame.MOUSEBUTTONDOWN:
             pressed = True
-            handleMouseDown()
+            handle_mouse_down()
 
         if event.type == pygame.MOUSEBUTTONUP:
             pressed = False
@@ -143,34 +143,34 @@ while True:
         if event.type == pygame.QUIT:
             quitGame()
 
-    surface.blit(background, (0,0))
+    window.blit(background, (0,0))
 
     # Draw the UI, update the movement of the planets,
     # then draw the planets in their new positions.
-    drawUI()
-    calculateMovement()
-    drawPlanets()
+    draw_ui()
+    calculate_movement()
+    draw_planets()
 
     # If our user has created a new planet,
     # draw it where the mouse is.
-    if currentBody:
-        drawCurrentBody()
+    if current_body:
+        draw_current_body()
 
         # If they've released the mouse, add the new planet to
         # the planets list and let gravity do its thing
         if not pressed:
             v = (mouse_pos - prev_mouse_pos) / 4
-            currentBody["velocity"] = v
-            planets.append(currentBody)
-            currentBody = None
+            current_body["velocity"] = v
+            planets.append(current_body)
+            current_body = None
 
     # Draw the logo for the first four seconds of the program
     if pygame.time.get_ticks() < 4000:
-        surface.blit(logo, (108,77))
+        window.blit(logo, (108,77))
 
     # Store the previous mouse coordinates to create a vector
     # when we release a new planet
     prev_mouse_pos = mouse_pos
 
-    clock.tick(60)
+    clock.tick(fps)
     pygame.display.update()

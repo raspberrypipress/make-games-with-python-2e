@@ -69,12 +69,12 @@ planets = [{
     "pos" : Vector2()
 }]
 
-def makeNewPlanet(which):
+def make_new_planet(which):
 
-    for pieceOfRock in planets:
+    for piece_of_rock in planets:
 
-        if pieceOfRock["name"] == which:
-            return copy.deepcopy(pieceOfRock)
+        if piece_of_rock["name"] == which:
+            return copy.deepcopy(piece_of_rock)
 
     return False
 
