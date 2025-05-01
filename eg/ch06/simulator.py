@@ -80,9 +80,7 @@ def calculate_movement():
             strength = ((gravity * p["mass"] * op["mass"]) /
                         (magnitude * magnitude)) / op["mass"]
 
-            print(n_direction, op["pos"] - op["pos"].move_towards(p["pos"], 1))
-
-            applied_force = n_direction * Vector2(strength)
+            applied_force = n_direction * strength
 
             op["velocity"] -= Vector2(applied_force)
             if draw_attractions:
