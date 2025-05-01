@@ -2,6 +2,7 @@ import pygame, sys, random, math
 import pygame.locals as GAME_GLOBALS
 import pygame.event as GAME_EVENTS
 import pygame.time as GAME_TIME
+from pygame.math import Vector2
 
 windowWidth = 1024
 windowHeight = 768
@@ -26,18 +27,16 @@ gravity = 1.0
 
 def drawCollidables():
 
-	for anObject in collidables:
-		anObject["position"][0] += anObject["velocity"][0]
-		anObject["position"][1] += anObject["velocity"][1]
+	for obj in collidables:
+		obj["pos"] += obj["velocity"]
 
-		pygame.draw.circle(surface, (255,255,255), (int(anObject["position"][0]), int(anObject["position"][1])), int(anObject["radius"]), 0)
+		pygame.draw.circle(surface, (255,255,255), obj["pos"], int(obj["radius"]), 0)
 
 def drawCurrentObject():
 
 	global expanding, currentObject
 
-	currentObject["position"][0] = mousePosition[0]
-	currentObject["position"][1] = mousePosition[1]
+	currentObject["pos"] = Vector2(mousePosition)
 
 	if expanding is True and currentObject["radius"] < 30:
 		currentObject["radius"] += 0.2
@@ -55,85 +54,66 @@ def drawCurrentObject():
 
 	currentObject["mass"] = currentObject["radius"]
 
-	pygame.draw.circle(surface, (255,0,0), (int(currentObject["position"][0]), int(currentObject["position"][1])), int(currentObject["radius"]), 0)
+	pygame.draw.circle(surface, (255,0,0), currentObject["pos"], int(currentObject["radius"]), 0)
 
 def calculateMovement():
 
-	for anObject in collidables:
+	for obj in collidables:
 
-		for theOtherObject in collidables:
-
-			if anObject is not theOtherObject:
+		other_objs = [x for x in collidables if x is not obj]
+		for other_obj in other_objs:
 				
-				direction = (theOtherObject["position"][0] - anObject["position"][0], theOtherObject["position"][1] - anObject["position"][1]) 
-				magnitude = math.hypot(theOtherObject["position"][0] - anObject["position"][0], theOtherObject["position"][1] - anObject["position"][1]) 
-				nDirection = (direction[0] / magnitude, direction[1] / magnitude)
+			direction = other_obj["pos"] - obj["pos"]
+			magnitude = other_obj["pos"].distance_to(obj["pos"])
+			nDirection = direction / magnitude
 
-				if magnitude < 5:
-					magnitude = 5
-				elif magnitude > 15:
-					magnitude = 15
+			if magnitude < 5:
+				magnitude = 5
+			elif magnitude > 15:
+				magnitude = 15
 
-				strength = ((gravity * anObject["mass"] * theOtherObject["mass"]) / (magnitude * magnitude)) / theOtherObject["mass"]
+			strength = ((gravity * obj["mass"] * other_obj["mass"]) / (magnitude * magnitude)) / other_obj["mass"]
+			appliedForce = nDirection * strength
+			other_obj["velocity"] -= Vector2(appliedForce)
 
-				appliedForce = (nDirection[0] * strength, nDirection[1] * strength)
-
-				theOtherObject["velocity"][0] -= appliedForce[0]
-				theOtherObject["velocity"][1] -= appliedForce[1]
-
-				if drawAttractions is True:
-					pygame.draw.line(surface, (255,255,255), (anObject["position"][0],anObject["position"][1]), (theOtherObject["position"][0],theOtherObject["position"][1]), 1)
+			if drawAttractions is True:
+				pygame.draw.line(surface, (255,255,255), obj["pos"], other_obj["pos"], 1)
 
 def handleCollisions():
 
-	h = 0
+	for obj in collidables:
 
-	while h < len(collidables):
+		other_objs = [x for x in collidables if x is not obj]
+		for other_obj in other_objs:
 
-		i = 0
+			distance = other_obj["pos"].distance_to(obj["pos"])
+			if distance < other_obj["radius"] + obj["radius"]:
 
-		anObject = collidables[h]
+				# First we get the angle of the collision between the two objects
+				collisionAngle = math.atan2(obj["pos"][1] - other_obj["pos"][1], obj["pos"][0] - other_obj["pos"][0])
 
-		while i < len(collidables):
+				#Then we need to calculate the speed of each object
+				obj_speed = obj["velocity"].magnitude()
+				other_obj_speed = other_obj["velocity"].magnitude()
 
-			otherObject = collidables[i]
+				# Now, we work out the direction of the objects in radians
+				objDirection = math.atan2(obj["velocity"][1], obj["velocity"][0])
+				other_objDirection = math.atan2(other_obj["velocity"][1], other_obj["velocity"][0])
 
-			if anObject != otherObject:
+				# Now we calculate the new X/Y values of each object for the collision
+				objsNewVelocityX = obj_speed * math.cos(objDirection - collisionAngle)
+				objsNewVelocityY = obj_speed * math.sin(objDirection - collisionAngle)
 
-				distance = math.hypot(otherObject["position"][0] - anObject["position"][0], otherObject["position"][1] - anObject["position"][1])
+				other_objsNewVelocityX = other_obj_speed * math.cos(other_objDirection - collisionAngle)
+				other_objsNewVelocityY = other_obj_speed * math.sin(other_objDirection - collisionAngle)
+				
+				# We adjust the velocity based on the mass of the objects
+				objsFinalVelocityX = ((obj["mass"] - other_obj["mass"]) * objsNewVelocityX + (other_obj["mass"] + other_obj["mass"]) * other_objsNewVelocityX)/(obj["mass"] + other_obj["mass"])
+				other_objsFinalVelocityX = ((obj["mass"] + obj["mass"]) * objsNewVelocityX + (other_obj["mass"] - obj["mass"]) * other_objsNewVelocityX)/(obj["mass"] + other_obj["mass"])
 
-				if distance < otherObject["radius"] + anObject["radius"]:
-
-					# First we get the angle of the collision between the two objects
-					collisionAngle = math.atan2(anObject["position"][1] - otherObject["position"][1], anObject["position"][0] - otherObject["position"][0])
-
-					#Then we need to calculate the speed of each object
-					anObjectSpeed = math.sqrt(anObject["velocity"][0] * anObject["velocity"][0] + anObject["velocity"][1] * anObject["velocity"][1])
-					theOtherObjectSpeed = math.sqrt(otherObject["velocity"][0] * otherObject["velocity"][0] + otherObject["velocity"][1] * otherObject["velocity"][1])
-
-					# Now, we work out the direction of the objects in radians
-					anObjectDirection = math.atan2(anObject["velocity"][1], anObject["velocity"][0])
-					theOtherObjectDirection = math.atan2(otherObject["velocity"][1], otherObject["velocity"][0])
-
-					# Now we calculate the new X/Y values of each object for the collision
-					anObjectsNewVelocityX = anObjectSpeed * math.cos(anObjectDirection - collisionAngle)
-					anObjectsNewVelocityY = anObjectSpeed * math.sin(anObjectDirection - collisionAngle)
-
-					otherObjectsNewVelocityX = theOtherObjectSpeed * math.cos(theOtherObjectDirection - collisionAngle)
-					otherObjectsNewVelocityY = theOtherObjectSpeed * math.sin(theOtherObjectDirection - collisionAngle)
-					
-					# We adjust the velocity based on the mass of the objects
-					anObjectsFinalVelocityX = ((anObject["mass"] - otherObject["mass"]) * anObjectsNewVelocityX + (otherObject["mass"] + otherObject["mass"]) * otherObjectsNewVelocityX)/(anObject["mass"] + otherObject["mass"])
-					otherObjectsFinalVelocityX = ((anObject["mass"] + anObject["mass"]) * anObjectsNewVelocityX + (otherObject["mass"] - anObject["mass"]) * otherObjectsNewVelocityX)/(anObject["mass"] + otherObject["mass"])
-
-					# Now we set those values
-					anObject["velocity"][0] = anObjectsFinalVelocityX
-					otherObject["velocity"][0] = otherObjectsFinalVelocityX
-
-
-			i += 1
-
-		h += 1
+				# Now we set those values
+				obj["velocity"][0] = objsFinalVelocityX
+				other_obj["velocity"][0] = other_objsFinalVelocityX
 
 def handleMouseDown():
 	global currentObject
@@ -141,8 +121,8 @@ def handleMouseDown():
 	currentObject = {
 		"radius" : 3,
 		"mass" : 3,
-		"velocity" : [0,0],
-		"position" : [0,0]
+		"velocity" : Vector2(),
+		"pos" : Vector2()
 	}
 
 def quitGame():
@@ -190,14 +170,13 @@ while True:
 	if currentObject is not None:
 		drawCurrentObject()
 
-		# If our user has released the mouse, add the new anObject to the collidables list and let gravity do its thing
+		# If our user has released the mouse, add the new obj to the collidables list and let gravity do its thing
 		if mouseDown is False:
-			currentObject["velocity"][0] = (mousePosition[0] - previousMousePosition[0]) / 4
-			currentObject["velocity"][1] = (mousePosition[1] - previousMousePosition[1]) / 4
+			currentObject["velocity"] = (Vector2(mousePosition) - Vector2(previousMousePosition)) / 4
 			collidables.append(currentObject)
 			currentObject = None
 
-	# Store the previous mouse coordinates to create a vector when we release a new anObject
+	# Store the previous mouse coordinates to create a vector when we release a new obj
 	previousMousePosition = mousePosition
 
 	clock.tick(60)
