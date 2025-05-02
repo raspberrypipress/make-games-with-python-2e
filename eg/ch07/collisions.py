@@ -1,4 +1,4 @@
-import pygame, sys, random, math
+import pygame, sys, math, random
 import pygame.locals as GAME_GLOBALS
 import pygame.event as GAME_EVENTS
 import pygame.time as GAME_TIME
@@ -30,7 +30,7 @@ def drawCollidables():
 	for obj in collidables:
 		obj["pos"] += obj["velocity"]
 
-		pygame.draw.circle(surface, (255,255,255), obj["pos"], int(obj["radius"]), 0)
+		pygame.draw.circle(surface, obj["colour"], obj["pos"], int(obj["radius"]), 0)
 
 def drawCurrentObject():
 
@@ -115,16 +115,8 @@ def handleCollisions():
 				mass = obj["mass"]
 				other_mass = other_obj["mass"]
 
-				#FIXME: use Vector2s here
-				objs_final_vel_x = ((mass - other_mass)
-						* objs_new_vel_x + (other_mass + other_mass)
-						* other_objs_new_vel_x)/(mass + other_mass)
-				objs_final_vel_y = ((mass - other_mass)
-						* objs_new_vel_y + (other_mass + other_mass)
-						* other_objs_new_vel_y)/(mass + other_mass)
 				objs_final_vel = ((mass - other_mass) * objs_new_vel + Vector2(other_mass + other_mass).elementwise() * other_objs_new_vel)/(mass + other_mass)
-				assert abs(objs_final_vel[0] - objs_final_vel_x) < 1e-9, (objs_final_vel[0], objs_final_vel_x)
-				assert abs(objs_final_vel[1] - objs_final_vel_y) < 1e-9, (objs_final_vel[1], objs_final_vel_y)
+				other_objs_final_vel = ((mass + mass) * objs_new_vel + Vector2(other_mass - mass).elementwise() * other_objs_new_vel)/(mass + other_mass)
 
 				other_objs_final_vel_x = ((mass + mass)
 						* objs_new_vel_x + (other_mass - mass)
@@ -132,12 +124,12 @@ def handleCollisions():
 				other_objs_final_vel_y = ((mass + mass)
 						* objs_new_vel_y + (other_mass - mass)
 						* other_objs_new_vel_y)/(mass + other_mass)
+				assert abs(other_objs_final_vel[0] - other_objs_final_vel_x) < 1e-9, (other_objs_final_vel[0], other_objs_final_vel_x)
+				assert abs(other_objs_final_vel[1] - other_objs_final_vel_y) < 1e-9, (other_objs_final_vel[1], other_objs_final_vel_y)
 
 				# Now we set those values
-				obj["velocity"][0] = objs_final_vel_x
-				obj["velocity"][1] = objs_final_vel_y
-				other_obj["velocity"][0] = other_objs_final_vel_x
-				other_obj["velocity"][1] = other_objs_final_vel_y
+				obj["velocity"] = objs_final_vel
+				other_obj["velocity"] = other_objs_final_vel
 
 def handleMouseDown():
 	global currentObject
@@ -197,6 +189,7 @@ while True:
 		# If our user has released the mouse, add the new obj to the collidables list and let gravity do its thing
 		if mouseDown is False:
 			currentObject["velocity"] = (Vector2(mousePosition) - Vector2(previousMousePosition)) / 4
+			currentObject["colour"] = random.choices(range(256), k=3)
 			collidables.append(currentObject)
 			currentObject = None
 
