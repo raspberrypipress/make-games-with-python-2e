@@ -61,10 +61,10 @@ def calculateMovement():
 	for obj in collidables:
 
 		other_objs = [x for x in collidables if x is not obj]
-		for other_obj in other_objs:
+		for other in other_objs:
 				
-			direction = other_obj["pos"] - obj["pos"]
-			magnitude = other_obj["pos"].distance_to(obj["pos"])
+			direction = other["pos"] - obj["pos"]
+			magnitude = other["pos"].distance_to(obj["pos"])
 			nDirection = direction / magnitude
 
 			if magnitude < 5:
@@ -72,64 +72,77 @@ def calculateMovement():
 			elif magnitude > 15:
 				magnitude = 15
 
-			strength = ((gravity * obj["mass"] * other_obj["mass"]) / (magnitude * magnitude)) / other_obj["mass"]
+			strength = ((gravity * obj["mass"] * other["mass"]) / (magnitude * magnitude)) / other["mass"]
 			appliedForce = nDirection * strength
-			other_obj["velocity"] -= Vector2(appliedForce)
+			other["velocity"] -= Vector2(appliedForce)
 
 			if drawAttractions is True:
-				pygame.draw.line(surface, (255,255,255), obj["pos"], other_obj["pos"], 1)
+				pygame.draw.line(surface, (255,255,255), obj["pos"], other["pos"], 1)
 
 def handleCollisions():
 
 	for obj in collidables:
 
 		other_objs = [x for x in collidables if x is not obj]
-		for other_obj in other_objs:
+		for other in other_objs:
 
-			distance = other_obj["pos"].distance_to(obj["pos"])
-			if distance < other_obj["radius"] + obj["radius"]:
+			distance = other["pos"].distance_to(obj["pos"])
+			if distance < other["radius"] + obj["radius"]:
 
 				# First we get the angle of the collision between the two objects
-				collisionAngle = math.atan2( *reversed(obj["pos"] - other_obj["pos"]) )
+				coll_angle = math.atan2( *reversed(obj["pos"] - other["pos"]) )
 
 				# Then we need to calculate the speed of each object
 				obj_speed = obj["velocity"].magnitude()
-				other_obj_speed = other_obj["velocity"].magnitude()
+				other_speed = other["velocity"].magnitude()
 
 				# Now, we work out the direction of the objects in radians
-				objDirection = math.atan2( *reversed(obj["velocity"]) )
-				other_objDirection = math.atan2( *reversed(other_obj["velocity"]) )
+				obj_dir = math.atan2( *reversed(obj["velocity"]) )
+				other_dir = math.atan2( *reversed(other["velocity"]) )
 
 				# Now we calculate the new X/Y values of each object for the collision
-				objs_new_vel_x = obj_speed * math.cos(objDirection - collisionAngle)
-				objs_new_vel_y = obj_speed * math.sin(objDirection - collisionAngle)
-				objs_new_vel = Vector2(obj_speed * math.cos(objDirection - collisionAngle),
-				                       obj_speed * math.sin(objDirection - collisionAngle))
+				obj_angle = obj_dir - coll_angle
+				obj_new_vel_x = obj_speed * math.cos(obj_angle)
+				obj_new_vel_y = obj_speed * math.sin(obj_angle)
+				obj_new_vel = Vector2(obj_speed * math.cos(obj_angle),
+				                      obj_speed * math.sin(obj_angle))
 
-				other_objs_new_vel_x = other_obj_speed * math.cos(other_objDirection - collisionAngle)
-				other_objs_new_vel_y = other_obj_speed * math.sin(other_objDirection - collisionAngle)
-				other_objs_new_vel = Vector2(other_obj_speed * math.cos(other_objDirection - collisionAngle),
-								             other_obj_speed * math.sin(other_objDirection - collisionAngle))
+				other_angle = other_dir - coll_angle
+				other_new_vel_x = other_speed * math.cos(other_angle)
+				other_new_vel_y = other_speed * math.sin(other_angle)
+				other_new_vel = Vector2(other_speed * math.cos(other_angle),
+								        other_speed * math.sin(other_angle))
 				
 				# We adjust the velocity based on the mass of the objects
 				mass = obj["mass"]
-				other_mass = other_obj["mass"]
+				other_mass = other["mass"]
 
-				objs_final_vel = ((mass - other_mass) * objs_new_vel + Vector2(other_mass + other_mass).elementwise() * other_objs_new_vel)/(mass + other_mass)
-				other_objs_final_vel = ((mass + mass) * objs_new_vel + Vector2(other_mass - mass).elementwise() * other_objs_new_vel)/(mass + other_mass)
+				obj_final_vel = ((mass - other_mass) * obj_new_vel + (other_mass * 2) * other_new_vel)/(mass + other_mass)
+				other_final_vel = ((mass * 2) * obj_new_vel + (other_mass - mass) * other_new_vel)/(mass + other_mass)
 
-				other_objs_final_vel_x = ((mass + mass)
-						* objs_new_vel_x + (other_mass - mass)
-						* other_objs_new_vel_x)/(mass + other_mass)
-				other_objs_final_vel_y = ((mass + mass)
-						* objs_new_vel_y + (other_mass - mass)
-						* other_objs_new_vel_y)/(mass + other_mass)
-				assert abs(other_objs_final_vel[0] - other_objs_final_vel_x) < 1e-9, (other_objs_final_vel[0], other_objs_final_vel_x)
-				assert abs(other_objs_final_vel[1] - other_objs_final_vel_y) < 1e-9, (other_objs_final_vel[1], other_objs_final_vel_y)
+				# Start old code - keep this here until you're done tweaking
+				obj_final_vel_x = ((mass - other_mass)
+						* obj_new_vel_x + (other_mass + other_mass)
+						* other_new_vel_x)/(mass + other_mass)
+				obj_final_vel_y = ((mass - other_mass)
+						* obj_new_vel_y + (other_mass + other_mass)
+						* other_new_vel_y)/(mass + other_mass)
+				assert abs(obj_final_vel[0] - obj_final_vel_x) < 1e-9, (obj_final_vel[0], obj_final_vel_x)
+				assert abs(obj_final_vel[1] - obj_final_vel_y) < 1e-9, (obj_final_vel[1], obj_final_vel_y)
+
+				other_final_vel_x = ((mass + mass)
+						* obj_new_vel_x + (other_mass - mass)
+						* other_new_vel_x)/(mass + other_mass)
+				other_final_vel_y = ((mass + mass)
+						* obj_new_vel_y + (other_mass - mass)
+						* other_new_vel_y)/(mass + other_mass)
+				assert abs(other_final_vel[0] - other_final_vel_x) < 1e-9, (other_final_vel[0], other_final_vel_x)
+				assert abs(other_final_vel[1] - other_final_vel_y) < 1e-9, (other_final_vel[1], other_final_vel_y)
+				# end old code
 
 				# Now we set those values
-				obj["velocity"] = objs_final_vel
-				other_obj["velocity"] = other_objs_final_vel
+				obj["velocity"] = obj_final_vel
+				other["velocity"] = other_final_vel
 
 def handleMouseDown():
 	global currentObject
