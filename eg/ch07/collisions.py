@@ -89,56 +89,45 @@ def handleCollisions():
 			distance = other["pos"].distance_to(obj["pos"])
 			if distance < other["radius"] + obj["radius"]:
 
-				# First we get the angle of the collision between the two objects
-				coll_angle = math.atan2( *reversed(obj["pos"] - other["pos"]) )
+				# Angle of the collision between the two
+				coll_angle = math.atan2( 
+					*reversed(obj["pos"] - other["pos"]))
 
-				# Then we need to calculate the speed of each object
+				# Calculate the speed of each object
 				obj_speed = obj["velocity"].magnitude()
 				other_speed = other["velocity"].magnitude()
 
-				# Now, we work out the direction of the objects in radians
-				obj_dir = math.atan2( *reversed(obj["velocity"]) )
-				other_dir = math.atan2( *reversed(other["velocity"]) )
+				# Work out the direction of the objects in radians
+				obj_dir = math.atan2(
+					*reversed(obj["velocity"]))
+				other_dir = math.atan2(
+					*reversed(other["velocity"]))
 
-				# Now we calculate the new X/Y values of each object for the collision
+				# Calculate the post-collision velocity
 				obj_angle = obj_dir - coll_angle
-				obj_new_vel_x = obj_speed * math.cos(obj_angle)
-				obj_new_vel_y = obj_speed * math.sin(obj_angle)
-				obj_new_vel = Vector2(obj_speed * math.cos(obj_angle),
-				                      obj_speed * math.sin(obj_angle))
+				obj_new_ang = Vector2(math.cos(obj_angle),
+				                      math.sin(obj_angle))
+				obj_new_vel = obj_new_ang * obj_speed
 
 				other_angle = other_dir - coll_angle
-				other_new_vel_x = other_speed * math.cos(other_angle)
-				other_new_vel_y = other_speed * math.sin(other_angle)
-				other_new_vel = Vector2(other_speed * math.cos(other_angle),
-								        other_speed * math.sin(other_angle))
+				other_new_ang = Vector2(math.cos(other_angle),
+								        math.sin(other_angle))
+				other_new_vel = other_new_ang * other_speed
 				
-				# We adjust the velocity based on the mass of the objects
+				# Adjust velocity based on object masses
 				mass = obj["mass"]
 				other_mass = other["mass"]
 
-				obj_final_vel = ((mass - other_mass) * obj_new_vel + (other_mass * 2) * other_new_vel)/(mass + other_mass)
-				other_final_vel = ((mass * 2) * obj_new_vel + (other_mass - mass) * other_new_vel)/(mass + other_mass)
-
-				# Start old code - keep this here until you're done tweaking
-				obj_final_vel_x = ((mass - other_mass)
-						* obj_new_vel_x + (other_mass + other_mass)
-						* other_new_vel_x)/(mass + other_mass)
-				obj_final_vel_y = ((mass - other_mass)
-						* obj_new_vel_y + (other_mass + other_mass)
-						* other_new_vel_y)/(mass + other_mass)
-				assert abs(obj_final_vel[0] - obj_final_vel_x) < 1e-9, (obj_final_vel[0], obj_final_vel_x)
-				assert abs(obj_final_vel[1] - obj_final_vel_y) < 1e-9, (obj_final_vel[1], obj_final_vel_y)
-
-				other_final_vel_x = ((mass + mass)
-						* obj_new_vel_x + (other_mass - mass)
-						* other_new_vel_x)/(mass + other_mass)
-				other_final_vel_y = ((mass + mass)
-						* obj_new_vel_y + (other_mass - mass)
-						* other_new_vel_y)/(mass + other_mass)
-				assert abs(other_final_vel[0] - other_final_vel_x) < 1e-9, (other_final_vel[0], other_final_vel_x)
-				assert abs(other_final_vel[1] - other_final_vel_y) < 1e-9, (other_final_vel[1], other_final_vel_y)
-				# end old code
+				obj_final_vel = (((mass - other_mass)
+					              * obj_new_vel
+								  + (other_mass * 2)
+								  * other_new_vel)
+								 /(mass + other_mass))
+				other_final_vel = (((mass * 2)
+						            * obj_new_vel
+									+ (other_mass - mass)
+									* other_new_vel)
+								   /(mass + other_mass))
 
 				# Now we set those values
 				obj["velocity"] = obj_final_vel
