@@ -118,16 +118,16 @@ def handleCollisions():
 				mass = obj["mass"]
 				other_mass = other["mass"]
 
-				obj_final_vel = (((mass - other_mass)
-					              * obj_new_vel
-								  + (other_mass * 2)
-								  * other_new_vel)
-								 /(mass + other_mass))
-				other_final_vel = (((mass * 2)
-						            * obj_new_vel
-									+ (other_mass - mass)
-									* other_new_vel)
-								   /(mass + other_mass))
+				obj_final_vel = (
+					((mass - other_mass) * obj_new_vel
+					 + (other_mass * 2) * other_new_vel)
+					/ (mass + other_mass)
+				)
+				other_final_vel = (
+					((mass * 2) * obj_new_vel
+					 + (other_mass - mass) * other_new_vel)
+					/ (mass + other_mass)
+				)
 
 				# Now we set those values
 				obj["velocity"] = obj_final_vel
