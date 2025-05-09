@@ -38,10 +38,10 @@ def drawCurrentObject():
 
 	currentObject["pos"] = Vector2(mousePosition)
 
-	if expanding is True and currentObject["radius"] < 30:
+	if expanding is True and currentObject["radius"] < 60:
 		currentObject["radius"] += 0.2
 
-		if currentObject["radius"] >= 30:
+		if currentObject["radius"] >= 60:
 			expanding = False
 			currentObject["radius"] = 9.9
 
@@ -88,6 +88,7 @@ def handleCollisions():
 
 			distance = other["pos"].distance_to(obj["pos"])
 			if distance < other["radius"] + obj["radius"]:
+				print(other["radius"] + obj["radius"] - distance)
 
 				# Angle of the collision between the two
 				coll_angle = math.atan2( 
@@ -97,7 +98,7 @@ def handleCollisions():
 				obj_speed = obj["velocity"].magnitude()
 				other_speed = other["velocity"].magnitude()
 
-				# Work out the direction of the objects in radians
+				# Get direction of the objects in radians
 				obj_dir = math.atan2(
 					*reversed(obj["velocity"]))
 				other_dir = math.atan2(
@@ -129,7 +130,7 @@ def handleCollisions():
 					/ (mass + other_mass)
 				)
 
-				# Now we set those values
+				# Set the final velocities
 				obj["velocity"] = obj_final_vel
 				other["velocity"] = other_final_vel
 
@@ -140,7 +141,8 @@ def handleMouseDown():
 		"radius" : 3,
 		"mass" : 3,
 		"velocity" : Vector2(),
-		"pos" : Vector2()
+		"pos" : Vector2(),
+		"colour" : random.choices(range(256), k=3)
 	}
 
 def quitGame():
@@ -191,7 +193,6 @@ while True:
 		# If our user has released the mouse, add the new obj to the collidables list and let gravity do its thing
 		if mouseDown is False:
 			currentObject["velocity"] = (Vector2(mousePosition) - Vector2(previousMousePosition)) / 4
-			currentObject["colour"] = random.choices(range(256), k=3)
 			collidables.append(currentObject)
 			currentObject = None
 
