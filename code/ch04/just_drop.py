@@ -14,11 +14,12 @@ window = pygame.display.set_mode((win_width, win_height))
 pygame.display.set_caption('Drop!')
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, window):
         super().__init__()
 
         self.gravity = 1
-        self.x = win_width / 2
+        self.window = window
+        self.x = window.get_width() / 2
         self.y = 1
         self.speed_x = 3
         self.direction = 0
@@ -62,11 +63,12 @@ class Player(pygame.sprite.Sprite):
 
 
 class Platform(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, window):
         super().__init__()
 
-        self.x = win_width/2
-        self.y = win_height
+        self.window = window
+        self.x = window.get_width() / 2
+        self.y = window.get_height()
         self.speed = 2
 
         self.image = pygame.Surface((win_width, 20), 
@@ -98,7 +100,7 @@ class Platform(pygame.sprite.Sprite):
 def restart_game():
     global platforms, player, platform_delay, game_started
     platforms = pygame.sprite.Group()
-    player = Player()
+    player = Player(window)
     platform_delay = 2000
     pygame.time.set_timer(NEW_PLATFORM, platform_delay)
     game_started = True
@@ -118,7 +120,7 @@ while True:
             pygame.quit()
             raise SystemExit
         if event.type == NEW_PLATFORM:
-            platforms.add(Platform())
+            platforms.add(Platform(window))
             platform_delay = max(800, platform_delay - 50)
             pygame.time.set_timer(NEW_PLATFORM, platform_delay)
      
