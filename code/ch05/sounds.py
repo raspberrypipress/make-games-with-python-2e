@@ -1,6 +1,6 @@
 import pygame
-from pygame import image, mixer
-import sys
+from pygame import image, mixer, Vector2
+import itertools
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -32,14 +32,15 @@ pygame.mixer.music.play(-1)
 # Create buttons
 animals = ["sheep", "rooster", "pig", "mouse",
            "horse", "dog", "cow", "chicken", "cat"]
-for y in range(0, 3):
-    for x in range(0, 3):
-        animal = animals.pop(0)
-        img = image.load(f"{imgs}/{animal}.png")
-        snd = mixer.Sound(f"{snds}/OGG/{animal}.ogg")
-        buttons.append({"image": img,
-                        "pos": (x * 200 + 25, y * 200 + 25),
-                        "sound": snd})
+coords = itertools.product([0,1,2], repeat=2)
+offset = Vector2(25, 25)
+for animal in animals:
+    position = Vector2(next(coords)) * 200 + offset
+    img = image.load(f"{imgs}/{animal}.png")
+    snd = mixer.Sound(f"{snds}/OGG/{animal}.ogg")
+    buttons.append({"image": img,
+                    "pos": position,
+                    "sound": snd})
 
 def draw_buttons():
     for button in buttons + [stop_btn]:
@@ -48,22 +49,12 @@ def draw_buttons():
             img = flash_button(img)
         window.blit(img, button["pos"])       
 
-def draw_volume():
-    pygame.draw.rect(window, (229, 229, 229), 
-                     volume_slider_rect)
-
-    volume_pos = (100 / 100) * (volume * 100)
-
-    pygame.draw.rect(window, (204, 204, 204), 
-                     (450 + volume_pos, 600, 10, 25))
-
-def checkVolume():
-    global volume
-
-    if pygame.mouse.get_pressed()[0]:
-        mouse_pos = pygame.mouse.get_pos()
-        if volume_slider_rect.collidepoint(pygame.mouse.get_pos()):
-            volume = float((mouse_pos[0] - 450)) / 100
+def flash_button(img):    
+    inv = pygame.Surface(img.get_rect().size, pygame.SRCALPHA)
+    inv.blit(img, (0,0), None)
+    inv.fill((255, 255, 255, 128), None, 
+             pygame.BLEND_RGBA_MULT)
+    return inv
 
 def handle_click():
     global flashed
@@ -83,18 +74,26 @@ def handle_click():
         pygame.time.set_timer(CLEAR_FLASH, flash_timer)
         mixer.stop()
 
-def flash_button(img):    
-    inv = pygame.Surface(img.get_rect().size, pygame.SRCALPHA)
-    inv.blit(img, (0,0), None)
-    inv.fill((255, 255, 255, 128), None, 
-             pygame.BLEND_RGBA_MULT)
-    return inv
+def draw_volume():
+    pygame.draw.rect(window, (229, 229, 229), 
+                     volume_slider_rect)
 
-def quitGame():
+    volume_pos = (100 / 100) * (volume * 100)
+
+    pygame.draw.rect(window, (204, 204, 204), 
+                     (450 + volume_pos, 600, 10, 25))
+
+def check_volume():
+    global volume
+
+    if pygame.mouse.get_pressed()[0]:
+        mouse_pos = pygame.mouse.get_pos()
+        if volume_slider_rect.collidepoint(mouse_pos):
+            volume = float((mouse_pos[0] - 450)) / 100
+
+def quit_game():
     pygame.quit()
     raise SystemExit
-
-
 
 # main loop
 while True:
@@ -103,16 +102,16 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                quitGame()
+                quit_game()
         if event.type == pygame.QUIT:
-            quitGame()
+            quit_game()
         if event.type == pygame.MOUSEBUTTONUP:
             handle_click()
         if event.type == CLEAR_FLASH:
             flashed = None
 
     draw_buttons()
-    checkVolume()
+    check_volume()
     draw_volume()
 
     pygame.display.update()
