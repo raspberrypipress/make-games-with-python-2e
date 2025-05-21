@@ -1,4 +1,4 @@
-import pygame, sys, math, random
+import pygame, math, random
 from pygame.math import Vector2
 
 pygame.init()
@@ -149,7 +149,7 @@ def handle_mouse_down():
 
 def quitGame():
     pygame.quit()
-    sys.exit()
+    raise SystemExit
 
 # 'main' loop
 while True:

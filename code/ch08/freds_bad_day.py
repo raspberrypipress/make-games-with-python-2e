@@ -1,4 +1,4 @@
-import pygame, sys, random, math
+import pygame, random
 import pygame.locals as GAME_GLOBALS
 import pygame.event as GAME_EVENTS
 import pygame.time as GAME_TIME
@@ -36,7 +36,7 @@ goRight = False
 
 def quitGame():
 	pygame.quit()
-	sys.exit()
+	raise SystemExit
 
 def newBarrel():
 	global Barrels, lastBarrel, lastBarrelSlot

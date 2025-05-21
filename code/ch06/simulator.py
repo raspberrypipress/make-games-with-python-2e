@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame
 import solarsystem
 from pygame.math import Vector2
 
@@ -110,7 +110,7 @@ def handle_mouse_down():
 
 def quitGame():
     pygame.quit()
-    sys.exit()
+    raise SystemExit
 
 # main loop
 pressed = False
