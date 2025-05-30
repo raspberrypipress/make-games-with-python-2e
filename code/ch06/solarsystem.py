@@ -1,17 +1,6 @@
 import pygame, copy
 from pygame.math import Vector2
 
-images = {
-    "mercury" : pygame.image.load("assets/mercury.png"),
-    "venus" : pygame.image.load("assets/venus.png"),
-    "earth" : pygame.image.load("assets/earth.png"),
-    "mars" : pygame.image.load("assets/mars.png"),
-    "jupiter" : pygame.image.load("assets/jupiter.png"),
-    "saturn" : pygame.image.load("assets/saturn.png"),
-    "neptune" : pygame.image.load("assets/neptune.png"),
-    "uranus" : pygame.image.load("assets/uranus.png"),
-}
-
 planets = [{
     "name" : "mercury",
     "radius" : 15.0,
@@ -69,8 +58,13 @@ planets = [{
     "pos" : Vector2()
 }]
 
-def make_new_planet(which):
+# Load the planet images
+images = {}
+for p in planets:
+    name = p["name"]
+    images[name] = pygame.image.load(f"assets/{name}.png")
 
+def make_new_planet(which):
     for piece_of_rock in planets:
 
         if piece_of_rock["name"] == which:

@@ -55,9 +55,7 @@ def draw_current_body():
     draw_body(current_body)
 
 def calculate_movement():
-
     for p in planets:
-
         other_planets = [x for x in planets if x is not p]
         for op in other_planets:
             
@@ -93,7 +91,6 @@ def check_ui_for_click(coordinates):
 
     for tab in ui_coordinates:
         tabX = tab["coords"][0]
-
         if coordinates[0] > tabX and coordinates[0] < tabX + 82:
             return tab["name"]
 
