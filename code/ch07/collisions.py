@@ -64,6 +64,8 @@ def calculate_movement():
                 
             direction = other["pos"] - o["pos"]
             magnitude = other["pos"].distance_to(o["pos"])
+            if magnitude == 0: # Two objects right atop each other!
+                continue
             n_direction = direction / magnitude
 
             if magnitude < 5:
@@ -90,7 +92,6 @@ def handle_collisions():
 
             distance = other["pos"].distance_to(o["pos"])
             if distance < other["radius"] + o["radius"]:
-                print(other["radius"]+o["radius"]-distance)
 
                 # Angle of the collision between the two
                 coll_angle = math.atan2( 
