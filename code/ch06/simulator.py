@@ -15,19 +15,20 @@ background = pygame.image.load("assets/background.jpg")
 logo = pygame.image.load("assets/logo.png")
 uitab = pygame.image.load("assets/tabs.png")
 
-# Draw the user interface
-ui_spacing = 97
-uitab_upperleft = (131, 687)
-x = uitab_upperleft[0] + 1
-ui_coordinates = []
-for name in solarsystem.images.keys():
+# Prepare the user interface metadata
+uitab_upperleft = ((win_width-uitab.get_width())/2,
+                   win_height-uitab.get_height())
+ui_coordinates = []  # Name and location of each planet button
+x = uitab_upperleft[0] + 1  # Start x for first tab
+ui_spacing = uitab.get_width()/len(solarsystem.planets) + 2
+for name in solarsystem.planets:
     ui_coordinates.append({"name": name,
                            "coords": (x, uitab_upperleft[1])})
     x += ui_spacing
 
 prev_mouse_pos = Vector2()
 mouse_pos = None
-planets = []
+bodies = []
 current_body = None
 draw_attractions = True
 gravity = 10.0
@@ -35,18 +36,18 @@ gravity = 10.0
 def draw_ui():
     window.blit(uitab, uitab_upperleft)
     x = uitab_upperleft[0]
-    for p in solarsystem.planets:
+    for name in solarsystem.planets:
         rect = pygame.Rect(x, uitab_upperleft[1], 82, 82)
-        img = solarsystem.images[p["name"]]
+        img = solarsystem.images[name]
         window.blit(img, img.get_rect(center=rect.center))
         x += ui_spacing
 
 def draw_body(body):
-    window.blit(solarsystem.images[body["name"]], 
-                 body["pos"] - Vector2(body["radius"]))
+    window.blit(body["image"], 
+                body["pos"] - Vector2(body["radius"]))
 
-def draw_planets():
-    for p in planets:
+def draw_bodies():
+    for p in bodies:
         p["pos"] += p["velocity"]
         draw_body(p)
 
@@ -55,9 +56,9 @@ def draw_current_body():
     draw_body(current_body)
 
 def calculate_movement():
-    for p in planets:
-        other_planets = [x for x in planets if x is not p]
-        for op in other_planets:
+    for p in bodies:
+        other_bodies = [x for x in bodies if x is not p]
+        for op in other_bodies:
             
             # Difference in the X,Y coordinates of the objects
             direction = op["pos"] - p["pos"]
@@ -87,11 +88,12 @@ def calculate_movement():
                                  op["pos"],
                                  1)
 
-def check_ui_for_click(coordinates):
+def check_ui_for_click(coords):
 
+    tab_height = win_height - uitab_upperleft[1]
     for tab in ui_coordinates:
         tabX = tab["coords"][0]
-        if coordinates[0] > tabX and coordinates[0] < tabX + 82:
+        if coords[0] > tabX and coords[0] < tabX + tab_height:
             return tab["name"]
 
     return False
@@ -100,10 +102,10 @@ def handle_mouse_down():
     global current_body
 
     if(mouse_pos[1] >= uitab_upperleft[1]):
-        new_planet = check_ui_for_click(mouse_pos)
+        name = check_ui_for_click(mouse_pos)
 
-        if new_planet:
-            current_body = solarsystem.make_new_planet(new_planet)
+        if name:
+            current_body = solarsystem.make_new_planet(name)
 
 def quitGame():
     pygame.quit()
@@ -123,7 +125,7 @@ while True:
         # FIXME: explain why we use KEYUP here instead of get_pressed()
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_r:
-                planets = []
+                bodies = []
             if event.key == pygame.K_a:
                 draw_attractions = not draw_attractions
 
@@ -140,11 +142,11 @@ while True:
 
     window.blit(background, (0,0))
 
-    # Draw the UI, update the movement of the planets,
-    # then draw the planets in their new positions.
+    # Draw the UI, update the movement of the bodies,
+    # then draw the bodies in their new positions.
     draw_ui()
     calculate_movement()
-    draw_planets()
+    draw_bodies()
 
     # If our user has created a new planet,
     # draw it where the mouse is.
@@ -152,11 +154,11 @@ while True:
         draw_current_body()
 
         # If they've released the mouse, add the new planet to
-        # the planets list and let gravity do its thing
+        # the bodies list and let gravity do its thing
         if not pressed:
             v = (mouse_pos - prev_mouse_pos) / 4
             current_body["velocity"] = v
-            planets.append(current_body)
+            bodies.append(current_body)
             current_body = None
 
     # Draw the logo for the first four seconds of the program
