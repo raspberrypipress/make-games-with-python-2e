@@ -90,7 +90,6 @@ def calculate_movement():
 def check_ui_for_click(coords):
     for tab in ui_coords:
         x = tab["coords"][0]
-        print(type(x))
         if coords[0] in range(x + 1, x + tab_height):
             return tab["name"]
     return False
