@@ -16,30 +16,29 @@ logo = pygame.image.load("assets/logo.png")
 uitab = pygame.image.load("assets/tabs.png")
 
 # Prepare the user interface metadata
-uitab_upperleft = ((win_width-uitab.get_width())/2,
-                   win_height-uitab.get_height())
-ui_coordinates = []  # Name and location of each planet button
-x = uitab_upperleft[0] + 1  # Start x for first tab
-ui_spacing = uitab.get_width()/len(solarsystem.planets) + 2
-for name in solarsystem.planets:
-    ui_coordinates.append({"name": name,
-                           "coords": (x, uitab_upperleft[1])})
-    x += ui_spacing
-
-prev_mouse_pos = Vector2()
-mouse_pos = None
-bodies = []
-current_body = None
-draw_attractions = True
-gravity = 10.0
-
+uitab_pos = (int((win_width-uitab.get_width())/2),
+              win_height-uitab.get_height())
+num_planets = len(solarsystem.planets)
+ui_spacing = int(uitab.get_width()/num_planets + 2)
+ui_coords = []  # Name and location of each planet button
+tab_height = win_height - uitab_pos[1]
 def draw_ui():
-    window.blit(uitab, uitab_upperleft)
-    x = uitab_upperleft[0]
+    global ui_coords
+
+    window.blit(uitab, uitab_pos) # Draw the UI tab graphic
+    x = uitab_pos[0]
     for name in solarsystem.planets:
-        rect = pygame.Rect(x, uitab_upperleft[1], 82, 82)
+        print(type(x))
+
+        # Draw the planet on the tab
+        rect = pygame.Rect(x, uitab_pos[1], 
+                           tab_height, tab_height)
         img = solarsystem.images[name]
         window.blit(img, img.get_rect(center=rect.center))
+
+        # Calculate the click zones for each tab
+        ui_coords.append({"name": name,
+                          "coords": (x + 1, uitab_pos[1])})
         x += ui_spacing
 
 def draw_body(body):
@@ -47,6 +46,7 @@ def draw_body(body):
                 body["pos"] - Vector2(body["radius"]))
 
 def draw_bodies():
+    # Update the position of the bodies and draw them
     for p in bodies:
         p["pos"] += p["velocity"]
         draw_body(p)
@@ -62,9 +62,11 @@ def calculate_movement():
             
             # Difference in the X,Y coordinates of the objects
             direction = op["pos"] - p["pos"]
+
             # Distance between the two objects
             magnitude = op["pos"].distance_to(p["pos"])
-            # Normalised Vector pointing in the
+
+            # Normalised vector pointing in the
             # direction of the force
             n_direction = direction / magnitude
 
@@ -78,30 +80,25 @@ def calculate_movement():
             # How strong should the attraction be?
             strength = ((gravity * p["mass"] * op["mass"]) /
                         (magnitude * magnitude)) / op["mass"]
-
             applied_force = n_direction * strength
 
             op["velocity"] -= Vector2(applied_force)
             if draw_attractions:
                 pygame.draw.line(window, (255,255,255), 
-                                 p["pos"],
-                                 op["pos"],
-                                 1)
+                                 p["pos"], op["pos"], 1)
 
 def check_ui_for_click(coords):
-
-    tab_height = win_height - uitab_upperleft[1]
-    for tab in ui_coordinates:
-        tabX = tab["coords"][0]
-        if coords[0] > tabX and coords[0] < tabX + tab_height:
+    for tab in ui_coords:
+        x = tab["coords"][0]
+        print(type(x))
+        if coords[0] in range(x + 1, x + tab_height):
             return tab["name"]
-
     return False
 
 def handle_mouse_down():
     global current_body
 
-    if(mouse_pos[1] >= uitab_upperleft[1]):
+    if(mouse_pos[1] >= uitab_pos[1]):
         name = check_ui_for_click(mouse_pos)
 
         if name:
@@ -112,6 +109,12 @@ def quitGame():
     raise SystemExit
 
 # main loop
+prev_mouse_pos = Vector2()
+mouse_pos = None
+bodies = []
+current_body = None
+draw_attractions = True
+gravity = 10.0
 pressed = False
 while True:
 
