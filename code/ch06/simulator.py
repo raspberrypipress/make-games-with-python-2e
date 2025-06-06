@@ -104,7 +104,7 @@ def handle_mouse_down():
         if name:
             current_body = solarsystem.make_new_planet(name)
 
-def quitGame():
+def quit_game():
     pygame.quit()
     raise SystemExit
 
@@ -118,14 +118,13 @@ gravity = 10.0
 pressed = False
 while True:
 
-    # Handle user and system events 
+    # Handle events 
     for event in pygame.event.get():
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                quitGame()
+                quit_game()
 
-        # FIXME: explain why we use KEYUP here instead of get_pressed()
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_r:
                 bodies = []
@@ -141,7 +140,7 @@ while True:
             pressed = False
 
         if event.type == pygame.QUIT:
-            quitGame()
+            quit_game()
 
     window.blit(background, (0,0))
 
