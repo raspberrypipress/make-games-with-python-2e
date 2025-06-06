@@ -56,9 +56,7 @@ def draw_current_object():
                        int(current_obj["radius"]), 0)
 
 def calculate_movement():
-
     for o in collidables:
-
         other_objs = [x for x in collidables if x is not o]
         for other in other_objs:
                 
@@ -76,8 +74,8 @@ def calculate_movement():
             strength = ((gravity * o["mass"] * other["mass"]) /
                         (magnitude * magnitude)) / other["mass"]
 
-            applied_force = n_direction * strength
-            other["velocity"] -= Vector2(applied_force)
+            applied_force = Vector2(n_direction * strength)
+            other["velocity"] -= applied_force
 
             if draw_attractions is True:
                 pygame.draw.line(window, (255,255,255), 
@@ -148,7 +146,7 @@ def handle_mouse_down():
         "colour" : random.choices(range(256), k=3)
     }
 
-def quitGame():
+def quit_game():
     pygame.quit()
     raise SystemExit
 
@@ -164,7 +162,7 @@ while True:
         if event.type == pygame.KEYDOWN:
 
             if event.key == pygame.K_ESCAPE:
-                quitGame()
+                quit_game()
 
         if event.type == pygame.KEYUP:
 
@@ -184,7 +182,7 @@ while True:
             mouse_down = False
 
         if event.type == pygame.QUIT:
-            quitGame()
+            quit_game()
 
     calculate_movement()
     handle_collisions()

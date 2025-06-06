@@ -61,11 +61,13 @@ def calculate_movement():
         other_bodies = [x for x in bodies if x is not p]
         for op in other_bodies:
             
-            # Difference in the X,Y coordinates of the objects
+            # Difference in the X,Y coordinates of the planets
             direction = op["pos"] - p["pos"]
 
-            # Distance between the two objects
+            # Distance between the two
             magnitude = op["pos"].distance_to(p["pos"])
+            if magnitude == 0: # Two planets right atop each other!
+                continue
 
             # Normalised vector pointing in the
             # direction of the force
