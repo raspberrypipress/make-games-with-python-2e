@@ -13,32 +13,33 @@ pygame.display.set_caption('Solar System Simulator')
 
 background = pygame.image.load("assets/background.jpg")
 logo = pygame.image.load("assets/logo.png")
-uitab = pygame.image.load("assets/tabs.png")
+ui = pygame.image.load("assets/tabs.png")
 
-# Prepare the user interface metadata
-uitab_pos = (int((win_width-uitab.get_width())/2),
-              win_height-uitab.get_height())
+# Initialise the user interface metadata
+ui_pos = (int((win_width-ui.get_width())/2),
+             win_height-ui.get_height())
 num_planets = len(solarsystem.planets)
-ui_spacing = int(uitab.get_width()/num_planets + 2)
+ui_spacing = int(ui.get_width()/num_planets + 2)
 ui_coords = []  # Name and location of each planet button
-tab_height = win_height - uitab_pos[1]
+x = ui_pos[0]
+for name in solarsystem.planets:
+    # Calculate the click zones for each tab
+    ui_coords.append({"name": name,
+                        "coords": (x + 1, ui_pos[1])})
+    x += ui_spacing
+
 def draw_ui():
     global ui_coords
 
-    window.blit(uitab, uitab_pos) # Draw the UI tab graphic
-    x = uitab_pos[0]
+    window.blit(ui, ui_pos) # Draw the UI tab graphic
+    x = ui_pos[0]
     for name in solarsystem.planets:
-        print(type(x))
 
         # Draw the planet on the tab
-        rect = pygame.Rect(x, uitab_pos[1], 
-                           tab_height, tab_height)
+        rect = pygame.Rect(x, ui_pos[1], 
+                           ui.get_height(), ui.get_height())
         img = solarsystem.images[name]
         window.blit(img, img.get_rect(center=rect.center))
-
-        # Calculate the click zones for each tab
-        ui_coords.append({"name": name,
-                          "coords": (x + 1, uitab_pos[1])})
         x += ui_spacing
 
 def draw_body(body):
@@ -80,9 +81,9 @@ def calculate_movement():
             # How strong should the attraction be?
             strength = ((gravity * p["mass"] * op["mass"]) /
                         (magnitude * magnitude)) / op["mass"]
-            applied_force = n_direction * strength
+            applied_force = Vector2(n_direction * strength)
 
-            op["velocity"] -= Vector2(applied_force)
+            op["velocity"] -= applied_force
             if draw_attractions:
                 pygame.draw.line(window, (255,255,255), 
                                  p["pos"], op["pos"], 1)
@@ -90,14 +91,14 @@ def calculate_movement():
 def check_ui_for_click(coords):
     for tab in ui_coords:
         x = tab["coords"][0]
-        if coords[0] in range(x + 1, x + tab_height):
+        if coords[0] in range(x + 1, x + ui.get_height()):
             return tab["name"]
     return False
 
 def handle_mouse_down():
     global current_body
 
-    if(mouse_pos[1] >= uitab_pos[1]):
+    if(mouse_pos[1] >= ui_pos[1]):
         name = check_ui_for_click(mouse_pos)
 
         if name:
