@@ -10,45 +10,21 @@ win_height = 768
 window = pygame.display.set_mode((win_width, win_height))
 pygame.display.set_caption('Collisions')
 
-prev_mouse_pos = Vector2()
-mouse_pos = None
-mouse_down = False
-
-collidables = []
-current_obj = None
-expanding = True
-
-draw_attractions = False
-
-gravity = 1.0
-
 def draw_collidables():
-
     for obj in collidables:
         obj["pos"] += obj["velocity"]
         pygame.draw.circle(window, obj["colour"], 
                            obj["pos"], int(obj["radius"]), 0)
 
+expansion = 0.2
 def draw_current_object():
-
-    global expanding, current_obj
+    global current_obj, expansion
 
     current_obj["pos"] = mouse_pos
+    if not (1 < current_obj["radius"] <= 20):
+        expansion *= -1
 
-    if expanding is True and current_obj["radius"] < 60:
-        current_obj["radius"] += 0.2
-
-        if current_obj["radius"] >= 60:
-            expanding = False
-            current_obj["radius"] = 9.9
-
-    elif expanding is False and current_obj["radius"] > 1:
-        current_obj["radius"] -= 0.2
-
-        if current_obj["radius"] <= 1:
-            expanding = True
-            current_obj["radius"] = 1.1
-
+    current_obj["radius"] += expansion
     current_obj["mass"] = current_obj["radius"]
 
     pygame.draw.circle(window, (255,0,0), 
@@ -62,7 +38,7 @@ def calculate_movement():
                 
             direction = other["pos"] - o["pos"]
             magnitude = other["pos"].distance_to(o["pos"])
-            if magnitude == 0: # Two objects right atop each other!
+            if magnitude == 0:
                 continue
             n_direction = direction / magnitude
 
@@ -82,9 +58,7 @@ def calculate_movement():
                                  o["pos"], other["pos"], 1)
 
 def handle_collisions():
-
     for o in collidables:
-
         other_objs = [x for x in collidables if x is not o]
         for other in other_objs:
 
@@ -136,7 +110,7 @@ def handle_collisions():
                 other["velocity"] = other_final_vel
 
 def handle_mouse_down():
-    global current_obj
+    global current_obj, expansion
 
     current_obj = {
         "radius" : 3,
@@ -145,27 +119,33 @@ def handle_mouse_down():
         "pos" : Vector2(),
         "colour" : random.choices(range(256), k=3)
     }
+    expansion = 0.2
 
 def quit_game():
     pygame.quit()
     raise SystemExit
 
-# 'main' loop
+# main loop
+prev_mouse_pos = Vector2()
+mouse_pos = None
+mouse_down = False
+collidables = []
+current_obj = None
+draw_attractions = False
+gravity = 1.0
 while True:
 
     window.fill((0,0,0))
     mouse_pos = Vector2(pygame.mouse.get_pos())
 
-    # Handle user and system events 
+    # Handle events 
     for event in pygame.event.get():
 
         if event.type == pygame.KEYDOWN:
-
             if event.key == pygame.K_ESCAPE:
                 quit_game()
 
         if event.type == pygame.KEYUP:
-
             if event.key == pygame.K_r:
                 collidables = []
             if event.key == pygame.K_a:
