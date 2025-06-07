@@ -67,7 +67,9 @@ def handle_collisions():
 
                 # Angle of the collision between the two
                 coll = o["pos"] - other["pos"]
-                coll_angle = math.atan2(-coll[1], coll[0])
+                coll2 = other["pos"] - o["pos"]
+                coll_angle = math.atan2(-coll.y, coll.x)
+                print(f"Coll {coll} {coll.normalize()}")
                 
                 # FIXME: "be aware that the y-axis needs to be reversed (-y respectively y1-y2) 
                 # because the y-axis is generally pointing up but in the PyGame coordinate system
@@ -81,8 +83,15 @@ def handle_collisions():
                 other_speed = other["velocity"].magnitude()
 
                 # Get direction of the objects in radians
-                obj_dir = math.atan2(-o["velocity"][1], o["velocity"][0])
-                other_dir = math.atan2(-other["velocity"][1], other["velocity"][0])
+                obj_dir = math.atan2(-o["velocity"].y,
+                                     o["velocity"].x)
+                other_dir = math.atan2(-other["velocity"].y,
+                                       other["velocity"].x)
+
+                obj_dir2 = math.radians(o["velocity"].angle_to((0,0)))
+                other_dir2 = math.radians(other["velocity"].angle_to((0,0)))
+                print(obj_dir2, obj_dir)
+                print(other_dir, other_dir2)
 
                 # Calculate the post-collision velocity
                 obj_angle = obj_dir - coll_angle
@@ -94,10 +103,15 @@ def handle_collisions():
                 other_new_ang = Vector2(math.cos(other_angle),
                                         math.sin(other_angle))
                 other_new_vel = other_new_ang * other_speed
-                
+
                 # Adjust velocity based on object masses
                 mass = o["mass"]
                 other_mass = other["mass"]
+
+                print(f"reflection: {other_new_vel}  {other["velocity"].reflect(coll.normalize())}")
+                print(f"reflection: {obj_new_vel}  {o["velocity"].reflect(coll.normalize())}")
+                # other_new_vel = other["velocity"].reflect(coll2.normalize())
+                # obj_new_vel = o["velocity"].reflect(coll2.normalize())
 
                 obj_final_vel = (
                     ((mass - other_mass) * obj_new_vel
