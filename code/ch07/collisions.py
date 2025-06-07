@@ -66,18 +66,23 @@ def handle_collisions():
             if distance < other["radius"] + o["radius"]:
 
                 # Angle of the collision between the two
-                coll_angle = math.atan2( 
-                    *reversed(o["pos"] - other["pos"]))
+                coll = o["pos"] - other["pos"]
+                coll_angle = math.atan2(-coll[1], coll[0])
+                
+                # FIXME: "be aware that the y-axis needs to be reversed (-y respectively y1-y2) 
+                # because the y-axis is generally pointing up but in the PyGame coordinate system
+                # the y-axis is pointing down." 
+                # https://github.com/Rabbid76/PyGameExamplesAndAnswers/blob/master/documentation/pygame/pygame_math_vector_and_reflection.md
+                coll_angle_new = math.radians((o["pos"] - other["pos"]).angle_to((0,0)))
+                print(coll_angle, coll_angle_new)
 
                 # Calculate the speed of each object
                 obj_speed = o["velocity"].magnitude()
                 other_speed = other["velocity"].magnitude()
 
                 # Get direction of the objects in radians
-                obj_dir = math.atan2(
-                    *reversed(o["velocity"]))
-                other_dir = math.atan2(
-                    *reversed(other["velocity"]))
+                obj_dir = math.atan2(-o["velocity"][1], o["velocity"][0])
+                other_dir = math.atan2(-other["velocity"][1], other["velocity"][0])
 
                 # Calculate the post-collision velocity
                 obj_angle = obj_dir - coll_angle
