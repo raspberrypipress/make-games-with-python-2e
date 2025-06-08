@@ -68,8 +68,6 @@ def handle_collisions():
                 # Angle of the collision between the two
                 coll = o["pos"] - other["pos"]
                 coll_angle = math.atan2(-coll.y, coll.x)
-                # coll_angle_new = math.radians((o["pos"] - other["pos"]).angle_to((0,0)))
-                # print(coll_angle, coll_angle_new)
 
                 # Calculate the speed of each object
                 obj_speed = o["velocity"].magnitude()
