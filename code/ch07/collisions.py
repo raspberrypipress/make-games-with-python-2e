@@ -16,21 +16,6 @@ def draw_collidables():
         pygame.draw.circle(window, obj["colour"], 
                            obj["pos"], int(obj["radius"]), 0)
 
-expansion = 0.2
-def draw_current_object():
-    global current_obj, expansion
-
-    current_obj["pos"] = mouse_pos
-    if not (1 < current_obj["radius"] <= 20):
-        expansion *= -1
-
-    current_obj["radius"] += expansion
-    current_obj["mass"] = current_obj["radius"]
-
-    pygame.draw.circle(window, (255,0,0), 
-                       current_obj["pos"], 
-                       int(current_obj["radius"]), 0)
-
 def calculate_movement():
     for o in collidables:
         other_objs = [x for x in collidables if x is not o]
@@ -56,6 +41,24 @@ def calculate_movement():
             if draw_attractions is True:
                 pygame.draw.line(window, (255,255,255), 
                                  o["pos"], other["pos"], 1)
+
+def draw_current_object():
+    global current_obj, expansion
+
+    current_obj["pos"] = mouse_pos
+
+    # If we've exceeded either bound, reverse the expansion
+    if not (1 < current_obj["radius"] < 20):
+        expansion *= -1
+
+    # Increase the radius by the expansion factor, and set
+    # the mass equal to the radius.
+    current_obj["radius"] += expansion
+    current_obj["mass"] = current_obj["radius"]
+
+    pygame.draw.circle(window, (255,0,0), 
+                       current_obj["pos"], 
+                       int(current_obj["radius"]), 0)
 
 def handle_collisions():
     for o in collidables:
@@ -112,6 +115,7 @@ def handle_collisions():
 def handle_mouse_down():
     global current_obj, expansion
 
+    # Initialise a new circle and set current_obj to it.
     current_obj = {
         "radius" : 3,
         "mass" : 3,
@@ -133,10 +137,8 @@ collidables = []
 current_obj = None
 draw_attractions = False
 gravity = 1.0
+expansion = 0.2
 while True:
-
-    window.fill((0,0,0))
-    mouse_pos = Vector2(pygame.mouse.get_pos())
 
     # Handle events 
     for event in pygame.event.get():
@@ -149,11 +151,9 @@ while True:
             if event.key == pygame.K_r:
                 collidables = []
             if event.key == pygame.K_a:
-                if draw_attractions is True:
-                    draw_attractions = False
-                elif draw_attractions is False:
-                    draw_attractions = True
+                draw_attractions = not draw_attractions
 
+        mouse_pos = Vector2(pygame.mouse.get_pos())
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_down = True
             handle_mouse_down()
@@ -164,6 +164,7 @@ while True:
         if event.type == pygame.QUIT:
             quit_game()
 
+    window.fill((0,0,0))
     calculate_movement()
     handle_collisions()
     draw_collidables()

@@ -17,7 +17,7 @@ ui = pygame.image.load("assets/tabs.png")
 
 # Initialise the user interface metadata
 ui_pos = (int((win_width-ui.get_width())/2),
-             win_height-ui.get_height())
+          win_height-ui.get_height())
 num_planets = len(solarsystem.planets)
 ui_spacing = int(ui.get_width()/num_planets + 2)
 ui_coords = []  # Name and location of each planet button
@@ -25,7 +25,7 @@ x = ui_pos[0]
 for name in solarsystem.planets:
     # Calculate the click zones for each tab
     ui_coords.append({"name": name,
-                        "coords": (x + 1, ui_pos[1])})
+                      "coords": (x + 1, ui_pos[1])})
     x += ui_spacing
 
 def draw_ui():
@@ -118,7 +118,7 @@ bodies = []
 current_body = None
 draw_attractions = True
 gravity = 10.0
-pressed = False
+mouse_down = False
 while True:
 
     # Handle events 
@@ -136,11 +136,11 @@ while True:
 
         mouse_pos = Vector2(pygame.mouse.get_pos())
         if event.type == pygame.MOUSEBUTTONDOWN:
-            pressed = True
+            mouse_down = True
             handle_mouse_down()
 
         if event.type == pygame.MOUSEBUTTONUP:
-            pressed = False
+            mouse_down = False
 
         if event.type == pygame.QUIT:
             quit_game()
@@ -160,7 +160,7 @@ while True:
 
         # If they've released the mouse, add the new planet to
         # the bodies list and let gravity do its thing
-        if not pressed:
+        if not mouse_down:
             v = (mouse_pos - prev_mouse_pos) / 4
             current_body["velocity"] = v
             bodies.append(current_body)
