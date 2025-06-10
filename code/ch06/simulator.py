@@ -4,11 +4,11 @@ from pygame.math import Vector2
 
 pygame.init()
 clock = pygame.time.Clock()
-fps = 60
+FPS = 60
 
-win_width = 1024
-win_height = 768
-window = pygame.display.set_mode((win_width, win_height))
+WIN_WIDTH = 1024
+WIN_HEIGHT = 768
+window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption('Solar System Simulator')
 
 background = pygame.image.load("assets/background.jpg")
@@ -16,31 +16,32 @@ logo = pygame.image.load("assets/logo.png")
 ui = pygame.image.load("assets/tabs.png")
 
 # Initialise the user interface metadata
-ui_pos = (int((win_width-ui.get_width())/2),
-          win_height-ui.get_height())
-num_planets = len(solarsystem.planets)
-ui_spacing = int(ui.get_width()/num_planets + 2)
+UI_POS = (int((WIN_WIDTH-ui.get_width())/2),
+          WIN_HEIGHT-ui.get_height())
+NUM_PLANETS = len(solarsystem.PLANETS)
+UI_SPACING = int(ui.get_width()/NUM_PLANETS + 2)
+
 ui_coords = []  # Name and location of each planet button
-x = ui_pos[0]
-for name in solarsystem.planets:
+x = UI_POS[0]
+for name in solarsystem.PLANETS:
     # Calculate the click zones for each tab
     ui_coords.append({"name": name,
-                      "coords": (x + 1, ui_pos[1])})
-    x += ui_spacing
+                      "coords": (x + 1, UI_POS[1])})
+    x += UI_SPACING
 
 def draw_ui():
     global ui_coords
 
-    window.blit(ui, ui_pos) # Draw the UI tab graphic
-    x = ui_pos[0]
-    for name in solarsystem.planets:
+    window.blit(ui, UI_POS) # Draw the UI tab graphic
+    x = UI_POS[0]
+    for name in solarsystem.PLANETS:
 
         # Draw the planet on the tab
-        rect = pygame.Rect(x, ui_pos[1], 
+        rect = pygame.Rect(x, UI_POS[1], 
                            ui.get_height(), ui.get_height())
-        img = solarsystem.images[name]
+        img = solarsystem.IMAGES[name]
         window.blit(img, img.get_rect(center=rect.center))
-        x += ui_spacing
+        x += UI_SPACING
 
 def draw_body(body):
     window.blit(body["image"], 
@@ -66,7 +67,7 @@ def calculate_movement():
 
             # Distance between the two
             magnitude = op["pos"].distance_to(p["pos"])
-            if magnitude == 0: # Two planets right atop each other!
+            if magnitude == 0: # Two planets atop each other!
                 continue
 
             # Normalised vector pointing in the
@@ -101,7 +102,7 @@ def check_ui_for_click(coords):
 def handle_mouse_down():
     global current_body
 
-    if(mouse_pos[1] >= ui_pos[1]):
+    if(mouse_pos[1] >= UI_POS[1]):
         name = check_ui_for_click(mouse_pos)
 
         if name:
@@ -123,11 +124,9 @@ while True:
 
     # Handle events 
     for event in pygame.event.get():
-
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 quit_game()
-
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_r:
                 bodies = []
@@ -138,7 +137,6 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_down = True
             handle_mouse_down()
-
         if event.type == pygame.MOUSEBUTTONUP:
             mouse_down = False
 
@@ -174,5 +172,5 @@ while True:
     # when we release a new planet
     prev_mouse_pos = mouse_pos
 
-    clock.tick(fps)
+    clock.tick(FPS)
     pygame.display.update()
