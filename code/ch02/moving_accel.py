@@ -2,9 +2,9 @@ import pygame, random
 pygame.init()
 clock = pygame.time.Clock()
 
-win_width = 640
-win_height = 480
-window = pygame.display.set_mode((win_width, win_height))
+WIN_WIDTH = 640
+WIN_HEIGHT = 480
+window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption('Pygame Shapes!')
 
 blue_square_x = 0.0

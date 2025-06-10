@@ -2,9 +2,11 @@ import pygame, random
 pygame.init()
 clock = pygame.time.Clock()
 
-win_width = 640
-win_height = 480
-window = pygame.display.set_mode((win_width, win_height))
+# Constants
+WIN_WIDTH = 640
+WIN_HEIGHT = 480
+# Set up display
+window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption('Pygame Shapes!')
 
 red_level = random.randint(0, 255)
@@ -19,9 +21,11 @@ while True:
 
     # Begin drawing statements
     window.fill((0,0,0))
+    # Draw rectangle with current color
     pygame.draw.rect(window, 
                      (red_level, green_level, blue_level),
-                     (50, 50, win_width / 2, win_height / 2))
+                     (50, 50, WIN_WIDTH / 2, WIN_HEIGHT / 2))
+
     if red_level >= 255:
         red_level = random.randint(0, 255)
     else:
