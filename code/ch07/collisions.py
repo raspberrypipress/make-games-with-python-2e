@@ -1,13 +1,15 @@
-import pygame, math, random
+import pygame
+import math
+import random
 from pygame.math import Vector2
 
 pygame.init()
 clock = pygame.time.Clock()
-fps = 60
+FPS = 60
 
-win_width = 1024
-win_height = 768
-window = pygame.display.set_mode((win_width, win_height))
+WIN_WIDTH = 1024
+WIN_HEIGHT = 768
+window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption('Collisions')
 
 def draw_collidables():
@@ -25,20 +27,17 @@ def calculate_movement():
             magnitude = other["pos"].distance_to(o["pos"])
             if magnitude == 0:
                 continue
-            n_direction = direction / magnitude
+            n_direction = direction.normalize()
 
-            if magnitude < 5:
-                magnitude = 5
-            elif magnitude > 15:
-                magnitude = 15
+            clamped_mag = max(5, min(15, magnitude))
 
             strength = ((gravity * o["mass"] * other["mass"]) /
-                        (magnitude * magnitude)) / other["mass"]
+                        (clamped_mag ** 2)) / other["mass"]
 
             applied_force = Vector2(n_direction * strength)
             other["velocity"] -= applied_force
 
-            if draw_attractions is True:
+            if draw_attractions:
                 pygame.draw.line(window, (255,255,255), 
                                  o["pos"], other["pos"], 1)
 
@@ -146,7 +145,6 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 quit_game()
-
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_r:
                 collidables = []
@@ -157,7 +155,6 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_down = True
             handle_mouse_down()
-
         if event.type == pygame.MOUSEBUTTONUP:
             mouse_down = False
 
@@ -169,12 +166,12 @@ while True:
     handle_collisions()
     draw_collidables()
 
-    if current_obj is not None:
+    if current_obj:
         draw_current_object()
 
         # If our user has released the mouse, add the new obj
         # to the collidables list and let gravity do its thing
-        if mouse_down is False:
+        if not mouse_down:
             v = (mouse_pos - prev_mouse_pos) / 4
             current_obj["velocity"] = v 
             collidables.append(current_obj)
@@ -184,5 +181,5 @@ while True:
     # when we release a new obj
     prev_mouse_pos = mouse_pos
 
-    clock.tick(60)
+    clock.tick(FPS)
     pygame.display.update()
