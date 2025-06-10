@@ -3,7 +3,7 @@ import random
 
 pygame.init()
 clock = pygame.time.Clock()
-fps = 60
+FPS = 60
 
 title_image = pygame.image.load("assets/title.jpg")
 game_over_image = pygame.image.load("assets/game_over.jpg")
@@ -158,4 +158,4 @@ while True:
         window.blit(title_image, (0, 150))
     
     pygame.display.update()
-    clock.tick(fps)
+    clock.tick(FPS)
