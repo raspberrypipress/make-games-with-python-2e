@@ -4,21 +4,23 @@ import pygame
 pygame.init()
 clock = pygame.time.Clock()
 
-win_width = 800
-win_height = 800
+WIN_WIDTH = 800
+WIN_HEIGHT = 800
 
-surface = pygame.display.set_mode((win_width, win_height))
+surface = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption('Pygame Keyboard!')
 
-# Square Variables
-player_size = 20
-player_x = (win_width / 2) - (player_size / 2)
-player_y = win_height - player_size
+# Constants
+PLAYER_SIZE = 20
+MAXJUMP_VY = 25.0
+MOVE_SPEED = 1.0
+MAX_VX = 10.0
+
+# Variables
+player_x = (WIN_WIDTH / 2) - (PLAYER_SIZE / 2)
+player_y = WIN_HEIGHT - PLAYER_SIZE
 player_vx = 1.0
 player_vy = 0.0
-maxjump_vy = 25.0
-move_speed = 1.0
-max_vx = 10.0
 gravity = 1.0
 
 def move(direction, jump):
@@ -27,21 +29,21 @@ def move(direction, jump):
     # Did we switch direction along the x axis?
     if (direction > 0 and player_vx < 0) or (direction < 0 and
                                              player_vx > 0):
-        player_vx = move_speed * direction
+        player_vx = MOVE_SPEED * direction
 
     # Move the player along the x axis
     if direction != 0:
         player_x += player_vx
     
     # Keep the player within the screen bounds along the x axis
-    if player_x > win_width - player_size:
-        player_x = win_width - player_size
+    if player_x > WIN_WIDTH - PLAYER_SIZE:
+        player_x = WIN_WIDTH - PLAYER_SIZE
     if player_x < 0:
         player_x = 0
 
     # If we're not already jumping, max out the y velocity
-    if jump and player_y == win_height - player_size:
-        player_vy = maxjump_vy
+    if jump and player_y == WIN_HEIGHT - PLAYER_SIZE:
+        player_vy = MAXJUMP_VY
 
     if player_vy > 1.0:
         # Decrease player_vy throughout the jump
@@ -51,7 +53,7 @@ def move(direction, jump):
 
     # Is our square in the air? 
     # Better add some gravity to bring it back down!
-    if player_y < win_height - player_size:
+    if player_y < WIN_HEIGHT - PLAYER_SIZE:
         player_y += gravity
         gravity = gravity * 1.1
     else: # Reset gravity so it starts at 1.0 next time we jump
@@ -61,10 +63,10 @@ def move(direction, jump):
     player_y -= player_vy
 
     # Don't let the player fall through the floor
-    player_y = min(player_y, win_height - player_size)
+    player_y = min(player_y, WIN_HEIGHT - PLAYER_SIZE)
 
     # Increase x velocity if we're moving but not at maximum.
-    if direction and abs(player_vx) < max_vx:
+    if direction and abs(player_vx) < MAX_VX:
         # But only if we're not in the air!
         if player_vy == 0:
             player_vx = player_vx * 1.1
@@ -119,7 +121,7 @@ while True:
 
     pygame.draw.rect(surface, (255,0,0), 
                      (player_x, player_y, 
-                      player_size, player_size))
+                      PLAYER_SIZE, PLAYER_SIZE))
 
     pygame.display.update()
 

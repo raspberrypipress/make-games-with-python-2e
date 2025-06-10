@@ -3,17 +3,17 @@ import pygame
 # Pygame setup and variables
 pygame.init()
 clock = pygame.time.Clock()
-win_width = 800
-win_height = 800
+WIN_WIDTH = 800
+WIN_HEIGHT = 800
 
-surface = pygame.display.set_mode((win_width, win_height))
+surface = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
 pygame.display.set_caption('Pygame Mouse!')
 
 # Gameplay Variables
 square_size = 40
-square_x = win_width / 2
-square_y = win_height - square_size
+square_x = WIN_WIDTH / 2
+square_y = WIN_HEIGHT - square_size
 gravity = 2.0
 pressed = False
 is_dragging = False
@@ -37,12 +37,12 @@ def checkGravity():
     global gravity, square_y
 
     # Is our square in the air 
-    if square_y < win_height - square_size:
+    if square_y < WIN_HEIGHT - square_size:
         if not is_dragging: # have we let go of it?
             square_y += gravity
             gravity = gravity * 1.05
     else:
-        square_y = win_height - square_size
+        square_y = WIN_HEIGHT - square_size
         gravity = 2.0
 
 def drawSquare():
