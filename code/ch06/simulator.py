@@ -72,18 +72,15 @@ def calculate_movement():
 
             # Normalised vector pointing in the
             # direction of the force
-            n_direction = direction / magnitude
+            n_direction = direction.normalize()
 
             # We need to limit the gravity to stop things 
             # flying off to infinity... and beyond!
-            if magnitude < 5:
-                magnitude = 5
-            elif magnitude > 30:
-                magnitude = 30
+            clamped_mag = max(5, min(30, magnitude))
 
             # How strong should the attraction be?
             strength = ((gravity * p["mass"] * op["mass"]) /
-                        (magnitude * magnitude)) / op["mass"]
+                        (clamped_mag ** 2)) / op["mass"]
             applied_force = Vector2(n_direction * strength)
 
             op["velocity"] -= applied_force
