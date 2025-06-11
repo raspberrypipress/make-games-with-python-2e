@@ -1,130 +1,138 @@
 import pygame
+import random
+from pygame.math import Vector2
 
-class Fred():
+class Fred(pygame.sprite.Sprite):
 
-  leftImage = None
-  rightImage = None
-  leftImageHit = None
-  rightImageHit = None
+    def __init__(self, win_width, win_height, game_time):
+        super().__init__()
+        
+        # Load images
+        self.leftImage = pygame.image.load("assets/Fred-Left.png")
+        self.rightImage = pygame.image.load("assets/Fred-Right.png")
+        self.leftImageHit = pygame.image.load("assets/Fred-Left-Hit.png")
+        self.rightImageHit = pygame.image.load("assets/Fred-Right-Hit.png")
+        print(self.leftImage.get_rect())
+        
+        # Set initial image and rect
+        self.image = self.rightImage
+        self.rect = self.image.get_rect()
 
-  def __init__(self, window):
-    self.window = window
-    self.reset()
-    self.x = self.window.get_width() / 2
+        self.game_time = game_time
+        
+        self.window_dims = Vector2(win_width, win_height)
+        self.reset()
 
-  def reset(self):
-    self.x = self.window.get_width() / 2
-    self.y = 625
+    def reset(self):
+        self.rect.centerx = self.window_dims.x // 2
+        self.rect.y = self.window_dims.y - 143
 
-    self.isHit = False
-    self.timeHit = 0
-    self.health = 100
+        self.isHit = False
+        self.timeHit = 0
+        self.health = 100
 
-    self.direction = 1
-    self.speed = 8
+        self.direction = 1  # 0 = left, 1 = right
+        self.speed = 8
 
-  def moveLeft(self, leftBound):
+    def moveLeft(self, leftBound):
+        if self.direction != 0:
+            self.direction = 0
 
-    if self.direction != 0:
-      self.direction = 0
+        if (self.rect.x - self.speed) > leftBound:
+            self.rect.x -= self.speed  
 
-    if((self.x - self.speed) > leftBound):
-      self.x -= self.speed  
+    def moveRight(self, rightBound):
+        if self.direction != 1:
+            self.direction = 1
 
-  def moveRight(self, rightBound):
+        if (self.rect.x + self.speed) + self.rect.width < rightBound:
+            self.rect.x += self.speed      
 
-    if self.direction != 1:
-      self.direction = 1
+    def update(self):
 
-    if((self.x + self.speed) + 58 < rightBound):
-      self.x += self.speed      
+        time = self.game_time.get_ticks()
+        # Handle hit state timeout
+        if self.timeHit > 0 and time - self.timeHit > 800:
+            self.timeHit = 0
+            self.isHit = False
 
-  def loadImages(self):
-    self.leftImage = pygame.image.load("assets/Fred-Left.png")
-    self.rightImage = pygame.image.load("assets/Fred-Right.png")
-    self.leftImageHit = pygame.image.load("assets/Fred-Left-Hit.png")
-    self.rightImageHit = pygame.image.load("assets/Fred-Right-Hit.png")
+        # Update sprite image based on direction and hit state
+        if self.direction == 1:
+            if self.isHit:
+                self.image = self.rightImageHit
+            else:
+                self.image = self.rightImage
+        else:
+            if self.isHit:
+                self.image = self.leftImageHit
+            else:
+                self.image = self.leftImage
 
-  def draw(self, time):
+    def hit(self, time):
+        # Call this when Fred gets hit
+        self.isHit = True
+        self.timeHit = time
+        self.health -= 10
 
-    if time - self.timeHit > 800:
-      self.timeHit = 0
-      self.isHit = False
+class Barrel(pygame.sprite.Sprite):
 
-    if self.direction == 1:
-      if self.isHit is False:
-        self.window.blit(self.rightImage, (self.x, self.y))
-      else :
-        self.window.blit(self.rightImageHit, (self.x, self.y))
-    else :
-      if self.isHit is False:
-        self.window.blit(self.leftImage, (self.x, self.y))
-      else :
-        self.window.blit(self.leftImageHit, (self.x, self.y))
+    # Calculate slot positions; these correspond to the
+    # slots that are drawn on the background image
+    slots = []
+    for i in range(13):
+        if i % 2 == 1:
+            y = 27
+        else:
+            y = 104
+        slots.append((4 + (i * 76), y))
+    lastBarrelSlot = 0
 
-class Barrel():
+    def __init__(self, win_width, win_height, game_time):
+        super().__init__()
+        
+        # Load images
+        self.barrelImage = pygame.image.load("assets/Barrel.png")
+        self.brokenImage = pygame.image.load("assets/Barrel_break.png")
+        
+        # Set initial image and rect
+        self.image = self.barrelImage
+        self.rect = self.image.get_rect()
 
-  slots = [(4, 103), (82, 27), (157, 104), (234, 27), (310, 104), (388, 27), (463, 104), (539, 27), (615, 104), (691, 27), (768, 104), (845, 27), (920, 104)]
-  slot = 0
-  x = 0
-  y = 0
+        while True:
+            slot = random.randint(0, 12)
+            if slot != Barrel.lastBarrelSlot:
+                break
+        Barrel.lastBarrelSlot = slot
+        self.rect.x = self.slots[slot][0]
+        self.rect.y = self.slots[slot][1] + 24
 
-  image = None
-  brokenImage = None
+        self.game_time = game_time
+        self.window_dims = Vector2(win_width, win_height)
 
-  isBroken = False
-  timeBroken = 0
-  needsRemoving = False
+        self.isBroken = False
+        self.timeBroken = 0
 
-  size = [33,22]
-  ratio = 0.66
+        self.vy = 1.5
+        self.gravity = 1.05
+        self.maxY = 20
 
-  vy = 1.5
-  gravity = 1.05
-  maxY = 20
+    def split(self):
+        self.isBroken = True
+        self.timeBroken = self.game_time.get_ticks()
+        self.vy = 5
+        self.rect.x -= 10
+        self.image = self.brokenImage
 
-  def split(self, time):
-    self.isBroken = True
-    self.timeBroken = time
-    self.vy = 5
-    self.x -= 10
+    def update(self):
+        # Apply gravity and movement
+        if self.vy < self.maxY:
+            self.vy = self.vy * self.gravity
+        self.rect.y += self.vy
 
-  def checkForCollision(self, fred):
+        # Remove if off screen or broken for too long
+        if self.rect.y > self.window_dims.y or self.timeBroken and self.game_time.get_ticks() - self.timeBroken > 1000:
+            print("killing barrel", self.game_time.get_ticks() - self.timeBroken)
+            self.kill()
 
-    hitX = False
-    hitY = False
-
-    if fred.x > self.x and fred.x < self.x + 75:
-      hitX = True
-    elif fred.x + 57 > self.x and fred.x + 57 < self.x + 75:
-      hitX = True
-    if fred.y + 120 > self.y and fred.y < self.y:
-      hitY = True
-    elif fred.y < self.y + 48:
-      hitY = True
-    if hitX is True and hitY is True:
-      return True
-
-  def loadImages(self):
-    self.image = pygame.image.load("assets/Barrel.png")
-    self.brokenImage = pygame.image.load("assets/Barrel_break.png")
-
-  def move(self, windowHeight):
-
-    if self.vy < self.maxY:
-      self.vy = self.vy * self.gravity
-    self.y += self.vy
-
-    if self.y > windowHeight:
-      self.needsRemoving = True
-
-  def draw(self, surface):
-    if self.isBroken is True:
-      surface.blit(self.brokenImage, (self.x, self.y))
-    else :
-      surface.blit(self.image, (self.x, self.y))
-
-  def __init__(self, slot):
-    self.slot = slot
-    self.x = self.slots[slot][0]
-    self.y = self.slots[slot][1] + 24
+    def checkForCollision(self, fred):
+        return self.rect.colliderect(fred.rect)

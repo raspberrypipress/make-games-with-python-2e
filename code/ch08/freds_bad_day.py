@@ -4,6 +4,8 @@ import pygame.event as GAME_EVENTS
 import pygame.time as GAME_TIME
 import objects
 
+# FIXME: pass fred GAME_TIME not the time itself
+# FIXME: use the kill function to remove sprites
 
 pygame.init()
 pygame.font.init()
@@ -25,12 +27,12 @@ startScreen = pygame.image.load("assets/startgame.png")
 endScreen = pygame.image.load("assets/gameover.png")
 
 background = pygame.image.load("assets/background.png")
-Fred = objects.Fred(window)
-Barrels = []
-lastBarrel = 0
-lastBarrelSlot = 0
-barrelInterval = 1500
+Fred = objects.Fred(win_width, win_height, GAME_TIME)
+all_sprites = pygame.sprite.Group()
+all_sprites.add(Fred)
 
+lastBarrel = 0
+barrelInterval = 1500
 goLeft = False
 goRight = False
 
@@ -39,77 +41,53 @@ def quitGame():
     raise SystemExit
 
 def newBarrel():
-    global Barrels, lastBarrel, lastBarrelSlot
-
-    slot = random.randint(0, 12)
-
-    while slot == lastBarrelSlot:
-        slot = random.randint(0, 12)
-
-    theBarrel = objects.Barrel(slot)
-    theBarrel.loadImages()
-
-    Barrels.append(theBarrel)
+    global all_sprites, lastBarrel
+    theBarrel = objects.Barrel(win_width, win_height, GAME_TIME)
+    all_sprites.add(theBarrel)
     lastBarrel = GAME_TIME.get_ticks()
-    lastBarrelSlot = slot
-
-Fred.loadImages()
 
 # 'main' loop
 while True:
     
     timeTick = GAME_TIME.get_ticks()
-
-    if gameStarted is True and gameOver is False:
+    if gameStarted and not gameOver:
 
         window.blit(background, (0, 0))
+        all_sprites.update()
 
-        Fred.draw(timeTick)
+        for barrel in all_sprites:
+            if not isinstance(barrel, objects.Barrel):
+                continue
 
-        barrelsToRemove = []
+            if not barrel.isBroken:
 
-        for idx, barrel in enumerate(Barrels):
-            barrel.move(win_height)
-            barrel.draw(window)
-
-            if barrel.isBroken is False:
-
+                # FIXME: could we move this into the barrel class and check for collision there? 
+                # By definition, a barrel will never collide with a barrel.
                 hasCollided = barrel.checkForCollision(Fred);
                 
                 if hasCollided is True:
-                    barrel.split(timeTick)
+                    barrel.split()
                     Fred.isHit = True
                     Fred.timeHit = timeTick
                     if Fred.health >= 10:
                         Fred.health -= 10
-                    else :
+                    else:
                         gameOver = True
                         gameFinishedTime = timeTick
-
-            elif timeTick - barrel.timeBroken > 1000:
-
-                barrelsToRemove.append(idx)
-                continue
-
-            if barrel.needsRemoving is True:
-                barrelsToRemove.append(idx)
-                continue
         
-        pygame.draw.rect(window, (175,59,59), (0, win_height - 10, (win_width / 100) * Fred.health , 10))
+        pygame.draw.rect(window, (175,59,59), (0, win_height - 10, (win_width / 100) * Fred.health, 10))
+        all_sprites.draw(window)
 
-        for index in barrelsToRemove:
-            del Barrels[index]
-
-        if goLeft is True:
+        if goLeft:
             Fred.moveLeft(0)
         
-        if goRight is True:
+        if goRight:
             Fred.moveRight(win_width)
 
-    elif gameStarted is False and gameOver is False:
+    elif not gameStarted and not gameOver:
         window.blit(startScreen, (0, 0))
 
-    elif gameStarted is True and gameOver is True:
+    elif gameStarted and gameOver:
         window.blit(endScreen, (0, 0))
         timeLasted = (gameFinishedTime - gameStartedTime) / 1000
     
@@ -140,8 +118,10 @@ while True:
                     gameStartedTime = timeTick
                 elif gameStarted is True and gameOver is True:
                     Fred.reset()
-                    
-                    Barrels = []
+
+                    for barrel in all_sprites:
+                        if isinstance(barrel, objects.Barrel):
+                            barrel.kill()
                     barrelInterval = 1500
 
                     gameOver = False
