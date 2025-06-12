@@ -21,7 +21,7 @@ gameStarted = False
 gameStartedTime = 0
 timeLasted = 0
 
-Fred = objects.Fred(win_width, win_height, pygame.time)
+Fred = objects.Fred(win_width, win_height)
 barrels = pygame.sprite.Group()
 lastBarrel = 0
 barrelInterval = 1500
@@ -32,7 +32,7 @@ def quitGame():
 
 def newBarrel():
     global barrels, lastBarrel
-    theBarrel = objects.Barrel(win_width, win_height, pygame.time)
+    theBarrel = objects.Barrel(win_width, win_height)
     barrels.add(theBarrel)
     lastBarrel = pygame.time.get_ticks()
 
@@ -74,12 +74,9 @@ while True:
         barrels.update()
 
         # check for collisions
-        b = pygame.sprite.spritecollideany(Fred, barrels)
-        if b and not b.isBroken:
-            b.split()
-            Fred.hit()
-            if Fred.health <= 0:
-                timeLasted = (timeTick - gameStartedTime) // 1000
+        Fred.check_collisions(barrels)
+        if Fred.health <= 0:
+            timeLasted = (timeTick - gameStartedTime) // 1000
         
         # FIXME: use a timer event to create barrels like we did in the platform chapter?
         if pygame.time.get_ticks() - lastBarrel > barrelInterval:
@@ -96,7 +93,8 @@ while True:
 
     elif gameStarted and Fred.health <= 0:
         window.blit(endScreen, (0, 0))
-        renderedText = textFont.render(f"{timeLasted:02}", 1, (175,59,59))
+        renderedText = textFont.render(f"{timeLasted:02}",
+                                       1, (175,59,59))
         window.blit(renderedText, (495, 430))
 
     clock.tick(60)

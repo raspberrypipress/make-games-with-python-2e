@@ -4,7 +4,7 @@ from pygame.math import Vector2
 
 class Fred(pygame.sprite.Sprite):
 
-    def __init__(self, win_width, win_height, game_time):
+    def __init__(self, win_width, win_height):
         super().__init__()
         
         # Load images
@@ -17,8 +17,6 @@ class Fred(pygame.sprite.Sprite):
         # Set initial image and rect
         self.image = self.rightImage
         self.rect = self.image.get_rect()
-
-        self.game_time = game_time
         
         self.window_dims = Vector2(win_width, win_height)
         self.reset()
@@ -46,9 +44,9 @@ class Fred(pygame.sprite.Sprite):
 
     def update(self):
 
-        time = self.game_time.get_ticks()
+        time = pygame.time.get_ticks()
         # Handle hit state timeout
-        if self.timeHit > 0 and time - self.timeHit > 800:
+        if self.isHit and time - self.timeHit > 800:
             self.timeHit = 0
             self.isHit = False
 
@@ -64,11 +62,13 @@ class Fred(pygame.sprite.Sprite):
             else:
                 self.image = self.leftImage
 
-    def hit(self):
-        # Call this when Fred gets hit
-        self.isHit = True
-        self.timeHit = self.game_time.get_ticks()
-        self.health -= 10
+    def check_collisions(self, barrels):
+        if b := pygame.sprite.spritecollideany(self, barrels):
+            if not b.isBroken:
+                b.split()
+                self.isHit = True
+                self.timeHit = pygame.time.get_ticks()
+                self.health -= 10
 
 class Barrel(pygame.sprite.Sprite):
 
@@ -83,7 +83,7 @@ class Barrel(pygame.sprite.Sprite):
         slots.append((4 + (i * 76), y))
     lastBarrelSlot = 0
 
-    def __init__(self, win_width, win_height, game_time):
+    def __init__(self, win_width, win_height):
         super().__init__()
         
         # Load images
@@ -102,7 +102,6 @@ class Barrel(pygame.sprite.Sprite):
         self.rect.x = self.slots[slot][0]
         self.rect.y = self.slots[slot][1] + 24
 
-        self.game_time = game_time
         self.window_dims = Vector2(win_width, win_height)
 
         self.isBroken = False
@@ -114,7 +113,7 @@ class Barrel(pygame.sprite.Sprite):
 
     def split(self):
         self.isBroken = True
-        self.timeBroken = self.game_time.get_ticks()
+        self.timeBroken = pygame.time.get_ticks()
         self.vy = 5
         self.rect.x -= 10
         self.image = self.brokenImage
@@ -126,5 +125,5 @@ class Barrel(pygame.sprite.Sprite):
         self.rect.y += self.vy
 
         # Remove if off screen or broken for too long
-        if self.rect.y > self.window_dims.y or self.timeBroken and self.game_time.get_ticks() - self.timeBroken > 1000:
+        if self.rect.y > self.window_dims.y or self.timeBroken and pygame.time.get_ticks() - self.timeBroken > 1000:
             self.kill()
