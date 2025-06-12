@@ -107,13 +107,10 @@ class Barrel(pygame.sprite.Sprite):
         self.window_dims = Vector2(win_width, win_height)
 
         self.is_broken = False
-        self.time_broken = 0
-
         self.vy = 1.5
 
     def split(self):
         self.is_broken = True
-        self.time_broken = pygame.time.get_ticks()
         self.vy = 5
         self.rect.x -= 10
         self.image = Barrel.BROKEN_IMG
