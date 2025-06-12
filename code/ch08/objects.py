@@ -17,6 +17,8 @@ class Fred(pygame.sprite.Sprite):
         # Set initial image and rect
         self.image = self.rightImage
         self.rect = self.image.get_rect()
+
+        self.max_health = 100
         
         self.window_dims = Vector2(win_width, win_height)
         self.reset()
@@ -27,7 +29,7 @@ class Fred(pygame.sprite.Sprite):
 
         self.isHit = False
         self.timeHit = 0
-        self.health = 100
+        self.health = self.max_health
 
         self.direction = 1  # 0 = left, 1 = right
         self.speed = 8
@@ -43,7 +45,6 @@ class Fred(pygame.sprite.Sprite):
             self.rect.x += self.speed * self.direction 
 
     def update(self):
-
         time = pygame.time.get_ticks()
         # Handle hit state timeout
         if self.isHit and time - self.timeHit > 800:
@@ -61,6 +62,13 @@ class Fred(pygame.sprite.Sprite):
                 self.image = self.leftImageHit
             else:
                 self.image = self.leftImage
+    
+    def health_meter(self):
+        health_percentage = self.health / self.max_health
+        surf = pygame.Surface((health_percentage
+                               * self.window_dims.x, 10))
+        surf.fill((175,59,59))
+        return surf
 
     def check_collisions(self, barrels):
         if b := pygame.sprite.spritecollideany(self, barrels):
