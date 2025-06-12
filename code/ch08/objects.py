@@ -34,19 +34,15 @@ class Fred(pygame.sprite.Sprite):
         self.direction = 1  # 0 = left, 1 = right
         self.speed = 8
 
-    def moveLeft(self, leftBound):
-        if self.direction != 0:
-            self.direction = 0
+    def set_direction(self, direction):
+        leftBound = 0
+        rightBound = self.window_dims.x
+        if self.direction != direction:
+            self.direction = direction
 
-        if (self.rect.x - self.speed) > leftBound:
-            self.rect.x -= self.speed  
-
-    def moveRight(self, rightBound):
-        if self.direction != 1:
-            self.direction = 1
-
-        if (self.rect.x + self.speed) + self.rect.width < rightBound:
-            self.rect.x += self.speed      
+        next_x = self.rect.x + self.speed * self.direction
+        if leftBound < next_x < rightBound - self.rect.width:
+            self.rect.x += self.speed * self.direction 
 
     def update(self):
 
@@ -68,10 +64,10 @@ class Fred(pygame.sprite.Sprite):
             else:
                 self.image = self.leftImage
 
-    def hit(self, time):
+    def hit(self):
         # Call this when Fred gets hit
         self.isHit = True
-        self.timeHit = time
+        self.timeHit = self.game_time.get_ticks()
         self.health -= 10
 
 class Barrel(pygame.sprite.Sprite):
@@ -133,6 +129,3 @@ class Barrel(pygame.sprite.Sprite):
         if self.rect.y > self.window_dims.y or self.timeBroken and self.game_time.get_ticks() - self.timeBroken > 1000:
             print("killing barrel", self.game_time.get_ticks() - self.timeBroken)
             self.kill()
-
-    def checkForCollision(self, fred):
-        return self.rect.colliderect(fred.rect)

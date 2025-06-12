@@ -28,117 +28,84 @@ endScreen = pygame.image.load("assets/gameover.png")
 
 background = pygame.image.load("assets/background.png")
 Fred = objects.Fred(win_width, win_height, GAME_TIME)
-all_sprites = pygame.sprite.Group()
-all_sprites.add(Fred)
+barrels = pygame.sprite.Group()
 
 lastBarrel = 0
 barrelInterval = 1500
-goLeft = False
-goRight = False
+fred_direction = 0
 
 def quitGame():
     pygame.quit()
     raise SystemExit
 
 def newBarrel():
-    global all_sprites, lastBarrel
+    global barrels, lastBarrel
     theBarrel = objects.Barrel(win_width, win_height, GAME_TIME)
-    all_sprites.add(theBarrel)
+    barrels.add(theBarrel)
     lastBarrel = GAME_TIME.get_ticks()
 
 # 'main' loop
 while True:
-    
-    timeTick = GAME_TIME.get_ticks()
-    if gameStarted and not gameOver:
 
-        window.blit(background, (0, 0))
-        all_sprites.update()
-
-        for barrel in all_sprites:
-            if not isinstance(barrel, objects.Barrel):
-                continue
-
-            if not barrel.isBroken:
-
-                # FIXME: could we move this into the barrel class and check for collision there? 
-                # By definition, a barrel will never collide with a barrel.
-                hasCollided = barrel.checkForCollision(Fred);
-                
-                if hasCollided is True:
-                    barrel.split()
-                    Fred.isHit = True
-                    Fred.timeHit = timeTick
-                    if Fred.health >= 10:
-                        Fred.health -= 10
-                    else:
-                        gameOver = True
-                        gameFinishedTime = timeTick
-        
-        pygame.draw.rect(window, (175,59,59), (0, win_height - 10, (win_width / 100) * Fred.health, 10))
-        all_sprites.draw(window)
-
-        if goLeft:
-            Fred.moveLeft(0)
-        
-        if goRight:
-            Fred.moveRight(win_width)
-
-    elif not gameStarted and not gameOver:
-        window.blit(startScreen, (0, 0))
-
-    elif gameStarted and gameOver:
-        window.blit(endScreen, (0, 0))
-        timeLasted = (gameFinishedTime - gameStartedTime) / 1000
-    
-        if timeLasted < 10:
-            timeLasted = "0" + str(timeLasted)
-        else:
-            timeLasted = str(timeLasted)
-
-        renderedText = textFont.render(timeLasted, 1, (175,59,59))
-        window.blit(renderedText, (495, 430))
-
-    # Handle user and system events 
+    # Handle events    
     for event in GAME_EVENTS.get():
-
         if event.type == pygame.KEYDOWN:
-
             if event.key == pygame.K_ESCAPE:
                 quitGame()
-            elif event.key == pygame.K_LEFT:
-                goLeft = True
-                goRight = False
-            elif event.key == pygame.K_RIGHT:
-                goLeft = False
-                goRight = True
             elif event.key == pygame.K_RETURN:
                 if gameStarted is False and gameOver is False:
                     gameStarted = True
                     gameStartedTime = timeTick
                 elif gameStarted is True and gameOver is True:
                     Fred.reset()
-
-                    for barrel in all_sprites:
+                    for barrel in barrels:
                         if isinstance(barrel, objects.Barrel):
                             barrel.kill()
                     barrelInterval = 1500
-
                     gameOver = False
-
-    if event.type == pygame.KEYUP:
-
-        if event.key == pygame.K_LEFT:
-            goLeft = False
-        if event.key == pygame.K_RIGHT:
-            goRight = False
 
         if event.type == GAME_GLOBALS.QUIT:
             quitGame()
 
+    timeTick = GAME_TIME.get_ticks()
+    if gameStarted and not gameOver:
+
+        window.blit(background, (0, 0))
+
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[pygame.K_LEFT]:
+            Fred.set_direction(-1)
+        elif pressed_keys[pygame.K_RIGHT]:
+            Fred.set_direction(1)            
+        Fred.update()
+        barrels.update()
+
+        # check for collisions
+        b = pygame.sprite.spritecollideany(Fred, barrels)
+        if b and not b.isBroken:
+            b.split()
+            Fred.hit()
+            if Fred.health < 10:
+                gameOver = True
+                gameFinishedTime = timeTick
+        
+        pygame.draw.rect(window, (175,59,59), (0, win_height - 10, (win_width / 100) * Fred.health, 10))
+        barrels.draw(window)
+        window.blit(Fred.image, Fred.rect)
+
+    elif not gameStarted and not gameOver:
+        window.blit(startScreen, (0, 0))
+
+    elif gameStarted and gameOver:
+        window.blit(endScreen, (0, 0))
+        timeLasted = (gameFinishedTime - gameStartedTime) // 1000
+        renderedText = textFont.render(f"{timeLasted:02}", 1, (175,59,59))
+        window.blit(renderedText, (495, 430))
+
     clock.tick(60)
     pygame.display.update()
 
+    # FIXME: use a timer event to create barrels like we did in the platform chapter?
     if GAME_TIME.get_ticks() - lastBarrel > barrelInterval and gameStarted is True:
         newBarrel()
         if barrelInterval > 150:
