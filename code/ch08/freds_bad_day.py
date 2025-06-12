@@ -1,5 +1,4 @@
 import pygame
-import pygame.event as GAME_EVENTS
 import objects
 
 pygame.init()
@@ -20,11 +19,11 @@ background = pygame.image.load("assets/background.png")
 gameStarted = False
 gameStartedTime = 0
 timeLasted = 0
+barrel_delay = 1500
+NEW_BARREL = pygame.USEREVENT + 0
 
 fred = objects.Fred(WIN_WIDTH, WIN_HEIGHT)
 barrels = pygame.sprite.Group()
-barrel_delay = 1500
-NEW_BARREL = pygame.USEREVENT + 0
 
 def restartGame():
     global gameStarted, gameStartedTime, barrels, barrel_delay
@@ -56,7 +55,7 @@ def quitGame():
 while True:
 
     # Handle events    
-    for event in GAME_EVENTS.get():
+    for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 quitGame()
