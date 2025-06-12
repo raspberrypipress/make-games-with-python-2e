@@ -127,5 +127,4 @@ class Barrel(pygame.sprite.Sprite):
 
         # Remove if off screen or broken for too long
         if self.rect.y > self.window_dims.y or self.timeBroken and self.game_time.get_ticks() - self.timeBroken > 1000:
-            print("killing barrel", self.game_time.get_ticks() - self.timeBroken)
             self.kill()
