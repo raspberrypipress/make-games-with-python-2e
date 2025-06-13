@@ -9,12 +9,9 @@ while True:
             raise SystemExit
 
     # Begin drawing statements
-    pygame.draw.line(window, (0,255,0),
-                     (150, 150), (225, 225), True)
-    pygame.draw.line(window, (0, 255, 0),
-                      (225, 225), (75, 225), True)
-    pygame.draw.line(window, (0, 255, 0),
-                     (75, 225), (150, 150), True)
+    pygame.draw.rect(window, (255,0,0), (100, 100, 25, 25))
+    pygame.draw.rect(window, (0,255,0), (200, 150, 25, 25))
+    pygame.draw.rect(window, (0,0,255), (300, 200, 25, 25))
     # End drawing statements
 
     pygame.display.update()

@@ -9,12 +9,11 @@ while True:
             raise SystemExit
 
     # Begin drawing statements
-    pygame.draw.line(window, (0,255,0),
-                     (150, 150), (225, 225), True)
-    pygame.draw.line(window, (0, 255, 0),
-                      (225, 225), (75, 225), True)
-    pygame.draw.line(window, (0, 255, 0),
-                     (75, 225), (150, 150), True)
+    pygame.draw.circle(window,(255,255,0),
+                       (200, 200), 20, 0)
+    # Not filled
+    pygame.draw.circle(window,(255,255,0),
+                       (300, 200), 20, 2)
     # End drawing statements
 
     pygame.display.update()
