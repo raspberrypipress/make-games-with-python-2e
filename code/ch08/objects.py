@@ -7,9 +7,9 @@ class Fred(pygame.sprite.Sprite):
     MAX_HEALTH = 100
     DEFAULT_IMG = pygame.image.load("assets/Fred-Right.png")
     HIT_IMG = pygame.image.load("assets/Fred-Right-Hit.png")
-    GROUND_HEIGHT = 143
+    SPEED = 8
 
-    def __init__(self, win_width, win_height):
+    def __init__(self, win_width, win_height, y_offset):
         super().__init__()
         
         # Set initial image and rect
@@ -17,28 +17,35 @@ class Fred(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         
         self.window_dims = Vector2(win_width, win_height)
+        self.y_offset = y_offset
         self.reset()
 
     def reset(self):
         self.rect.centerx = self.window_dims.x // 2
-        self.rect.y = self.window_dims.y - Fred.GROUND_HEIGHT
+        self.rect.bottom = self.window_dims.y - self.y_offset
 
         self.is_hit = False
         self.time_hit = 0
         self.health = Fred.MAX_HEALTH
-
         self.direction = 1  # 0 = left, 1 = right
-        self.speed = 8
 
     def set_direction(self, direction):
-        left_max = 0
-        right_max = self.window_dims.x
         self.direction = direction
 
         # Make sure Fred remains within bounds before moving
-        next_x = self.rect.x + self.speed * self.direction
+        left_max = 0
+        right_max = self.window_dims.x
+        next_x = self.rect.x + Fred.SPEED * self.direction
         if left_max < next_x < right_max - self.rect.width:
             self.rect.x = next_x
+
+    def check_collisions(self, barrels):
+        if b := pygame.sprite.spritecollideany(self, barrels):
+            if not b.is_broken:
+                b.split()
+                self.is_hit = True
+                self.time_hit = pygame.time.get_ticks()
+                self.health -= 10
 
     def update(self):
         time = pygame.time.get_ticks()
@@ -64,13 +71,6 @@ class Fred(pygame.sprite.Sprite):
         surf.fill((175,59,59))
         return surf
 
-    def check_collisions(self, barrels):
-        if b := pygame.sprite.spritecollideany(self, barrels):
-            if not b.is_broken:
-                b.split()
-                self.is_hit = True
-                self.time_hit = pygame.time.get_ticks()
-                self.health -= 10
 
 class Barrel(pygame.sprite.Sprite):
 
@@ -80,13 +80,13 @@ class Barrel(pygame.sprite.Sprite):
     MAX_Y = 20
 
     # Calculate slot positions; these correspond to the slots
-    # that are drawn on the background image
+    # that are predrawn on the background image
     slots = []
     for i in range(13):
         if i % 2 == 1:
-            y = 27
+            y = 51
         else:
-            y = 104
+            y = 128
         slots.append((4 + (i * 76), y))
     last_barrel_slot = 0
 
@@ -102,7 +102,7 @@ class Barrel(pygame.sprite.Sprite):
                 break
         Barrel.last_barrel_slot = slot
         self.rect.x = self.slots[slot][0]
-        self.rect.y = self.slots[slot][1] + 24
+        self.rect.y = self.slots[slot][1]
 
         self.window_dims = Vector2(win_width, win_height)
 

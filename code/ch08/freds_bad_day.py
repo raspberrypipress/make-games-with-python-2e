@@ -8,6 +8,7 @@ FPS = 60
 
 WIN_WIDTH = 1000
 WIN_HEIGHT = 768
+FRED_OFFSET = 23
 window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Fred's Bad Day")
 textFont = pygame.font.SysFont("monospace", 50)
@@ -22,7 +23,7 @@ time_lasted = 0
 barrel_delay = 1500
 NEW_BARREL = pygame.USEREVENT + 0
 
-fred = objects.Fred(WIN_WIDTH, WIN_HEIGHT)
+fred = objects.Fred(WIN_WIDTH, WIN_HEIGHT, FRED_OFFSET)
 barrels = pygame.sprite.Group()
 
 def restart_game():
