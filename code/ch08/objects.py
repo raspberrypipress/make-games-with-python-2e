@@ -78,6 +78,7 @@ class Barrel(pygame.sprite.Sprite):
     BROKEN_IMG = pygame.image.load("assets/Barrel_break.png")
     GRAVITY = 1.05
     MAX_Y = 20
+    last_barrel_slot = 0
 
     # Calculate slot positions; these correspond to the slots
     # that are predrawn on the background image
