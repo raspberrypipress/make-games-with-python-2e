@@ -12,21 +12,21 @@ window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Fred's Bad Day")
 textFont = pygame.font.SysFont("monospace", 50)
 
-startScreen = pygame.image.load("assets/startgame.png")
-endScreen = pygame.image.load("assets/gameover.png")
+start_screen = pygame.image.load("assets/startgame.png")
+end_screen = pygame.image.load("assets/gameover.png")
 background = pygame.image.load("assets/background.png")
 
-gameStarted = False
-gameStartedTime = 0
-timeLasted = 0
+game_started = False
+start_time = 0
+time_lasted = 0
 barrel_delay = 1500
 NEW_BARREL = pygame.USEREVENT + 0
 
 fred = objects.Fred(WIN_WIDTH, WIN_HEIGHT)
 barrels = pygame.sprite.Group()
 
-def restartGame():
-    global gameStarted, gameStartedTime, barrels, barrel_delay
+def restart_game():
+    global game_started, start_time, barrels, barrel_delay
 
     fred.reset()
     for barrel in barrels:
@@ -35,10 +35,10 @@ def restartGame():
     barrel_delay = 1500
     pygame.time.set_timer(NEW_BARREL, barrel_delay)
 
-    gameStarted = True
-    gameStartedTime = pygame.time.get_ticks()
+    game_started = True
+    start_time = pygame.time.get_ticks()
 
-def newBarrel():
+def new_barrel():
     global barrels, barrel_delay
 
     new_barrel = objects.Barrel(WIN_WIDTH, WIN_HEIGHT)
@@ -47,7 +47,7 @@ def newBarrel():
         barrel_delay -= 50
     pygame.time.set_timer(NEW_BARREL, barrel_delay)
 
-def quitGame():
+def quit_game():
     pygame.quit()
     raise SystemExit
 
@@ -58,24 +58,22 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                quitGame()
+                quit_game()
             elif event.key == pygame.K_RETURN:
-                if not gameStarted and fred.health > 0:
-                    restartGame()
-                elif gameStarted and fred.health <= 0:
-                    restartGame()
+                if not game_started or fred.health <= 0:
+                    restart_game()
 
         if event.type == pygame.QUIT:
-            quitGame()
+            quit_game()
         if event.type == NEW_BARREL and fred.health > 0:
-            newBarrel()
+            new_barrel()
 
     # If the game hasn't been started, show the start screen
-    if not gameStarted:
-        window.blit(startScreen, (0, 0))
+    if not game_started:
+        window.blit(start_screen, (0, 0))
 
     # If the game is started and Fred's alive, play the game
-    elif gameStarted and fred.health > 0:
+    elif game_started and fred.health > 0:
         window.blit(background, (0, 0))
 
         # Set Fred's direction based on the keys pressed
@@ -91,8 +89,8 @@ while True:
         # Check for collisions and check Fred's health
         fred.check_collisions(barrels)
         if fred.health <= 0:
-            timeTick = pygame.time.get_ticks()
-            timeLasted = (timeTick - gameStartedTime) // 1000
+            time_tick = pygame.time.get_ticks()
+            time_lasted = (time_tick - start_time) // 1000
 
         # Draw the barrels, Fred, and the health meter
         barrels.draw(window)
@@ -101,8 +99,8 @@ while True:
 
     # If Fred's health falls to 0, it's game over!
     elif fred.health <= 0:
-        window.blit(endScreen, (0, 0))
-        renderedText = textFont.render(f"{timeLasted:02}",
+        window.blit(end_screen, (0, 0))
+        renderedText = textFont.render(f"{time_lasted:02}",
                                        1, (175,59,59))
         window.blit(renderedText, (495, 430))
 
