@@ -4,131 +4,101 @@ import pygame.event as GAME_EVENTS
 import pygame.time as GAME_TIME
 import ships
 
-windowWidth = 1024
-windowHeight = 614
-
 pygame.init()
 pygame.font.init()
 clock = pygame.time.Clock()
-surface = pygame.display.set_mode((windowWidth, windowHeight))
+FPS = 60
 
+window_width = 1024
+window_height = 614
+surface = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption('Alien\'s Are Gonna Kill Me!')
-textFont = pygame.font.SysFont("monospace", 50)
+text_font = pygame.font.SysFont("monospace", 50)
 
-gameStarted = False
-gameStartedTime = 0
-gameFinishedTime = 0
-gameOver = False
-
-#Mouse Variables
-mousePosition = (0,0)
-mouseStates = None
-mouseDown = False
-
-#Image Variables
-startScreen = pygame.image.load("assets/start_screen.png")
+# Image Variables
+start_screen = pygame.image.load("assets/start_screen.png")
 background = pygame.image.load("assets/background.png")
+start_button_rect = pygame.Rect(445, 450, 135, 60)
 
-#Ships
-ship = ships.Player(windowWidth / 2, windowHeight, pygame, surface)
-enemyShips = []
+game_started = False
+game_started_time = 0
+game_finished_time = 0
+game_over = False
+NEW_ENEMY = pygame.USEREVENT + 0
+# Mouse Variables
+mouse_position = (0, 0)
 
-lastEnemyCreated = 0
-enemyInterval = random.randint(1000, 2500)
+# Ships
+all_sprites = pygame.sprite.Group()
+ship = ships.Player(surface, all_sprites)
+enemy_ships = pygame.sprite.Group()
 
-#Sound Setup
+# Sound Setup
 pygame.mixer.init()
 
-def updateGame():
+def quit_game():
+    pygame.quit()
+    sys.exit()
 
-  global mouseDown, gameOver
-
-  if mouseStates[0] is 1 and mouseDown is False:
-    ship.fire()
-    mouseDown = True
-  elif mouseStates[0] is 0 and mouseDown is True:
-    mouseDown = False
-
-  ship.setPosition(mousePosition)
-
-  enemiesToRemove = []
-
-  for idx, enemy in enumerate(enemyShips):
-
-    if enemy.y < windowHeight:
-      enemy.move()
-      enemy.tryToFire()
-      shipIsDestroyed = enemy.checkForHit(ship)
-      enemyIsDestroyed = ship.checkForHit(enemy)
-
-      if enemyIsDestroyed is True:
-        enemiesToRemove.append(idx)
-
-      if shipIsDestroyed is True:
-        gameOver = True
-        quitGame()
-
-    else:
-      enemiesToRemove.append(idx)
-
-  for idx in enemiesToRemove:
-    del enemyShips[idx]
-
-def drawGame():
-    surface.blit(background, (0, 0))
-    ship.draw()
-    ship.drawBullets()
-
-    for enemy in enemyShips:
-      enemy.draw()
-      enemy.drawBullets()
-
-def quitGame():
-  pygame.quit()
-  sys.exit()
+def add_new_enemy():
+    enemy = ships.Enemy(surface, all_sprites, 1)
+    enemy_ships.add(enemy)
+    enemy_interval = random.randint(1000, 2500)
+    pygame.time.set_timer(NEW_ENEMY, enemy_interval)
 
 # 'main' loop
+add_new_enemy()
 while True:
 
-  timeTick = GAME_TIME.get_ticks()
-  mousePosition = pygame.mouse.get_pos()
-  mouseStates = pygame.mouse.get_pressed()
+    clicked = False
+    # Handle user and system events 
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                quit_game()
+        if event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:
+                clicked = True
+        if event.type == NEW_ENEMY:
+            add_new_enemy()
+        if event.type == GAME_GLOBALS.QUIT:
+            quit_game()
 
-  if gameStarted is True and gameOver is False:
+    time_tick = GAME_TIME.get_ticks()
+    mouse_position = pygame.mouse.get_pos()
 
-    updateGame()
-    drawGame()
+    if game_started and not game_over:
+        surface.blit(background, (0, 0))
 
-  elif gameStarted is False and gameOver is False:
-    surface.blit(startScreen, (0, 0))
+        if clicked:
+            ship.fire()
+        ship.set_position(mouse_position)
 
-    if mouseStates[0] is 1:
+        all_sprites.update()
 
-      if mousePosition[0] > 445 and mousePosition[0] < 580 and mousePosition[1] > 450 and mousePosition[1] < 510:
+        for enemy in enemy_ships:
+            enemy.try_to_fire()
+            enemy.check_for_hit(ship)
+            ship.check_for_hit(enemy)
 
-        gameStarted = True
+        if ship.health <= 0:
+            game_over = True
+            game_finished_time = GAME_TIME.get_ticks()
 
-    elif mouseStates[0] is 0 and mouseDown is True:
-      mouseDown = False
+        all_sprites.draw(surface)
 
-  elif gameStarted is True and gameOver is True:
-    surface.blit(startScreen, (0, 0))
-    timeLasted = (gameFinishedTime - gameStartedTime) / 1000
+    elif not game_started and not game_over:
+        surface.blit(start_screen, (0, 0))
+        if clicked:
+            if start_button_rect.collidepoint(mouse_position):
+                game_started = True
+                game_started_time = GAME_TIME.get_ticks()
 
-  # Handle user and system events 
-  for event in GAME_EVENTS.get():
-
-    if event.type == pygame.KEYDOWN:
-
-      if event.key == pygame.K_ESCAPE:
-        quitGame()
-
-  if GAME_TIME.get_ticks() - lastEnemyCreated > enemyInterval and gameStarted is True:
-    enemyShips.append(ships.Enemy(random.randint(0, windowWidth), -60, pygame, surface, 1))
-    lastEnemyCreated = GAME_TIME.get_ticks()
-
-  if event.type == GAME_GLOBALS.QUIT:
-    quitGame()
+    elif game_started and game_over:
+        surface.blit(start_screen, (0, 0))
+        time_lasted = (game_finished_time - game_started_time) // 1000
+        print(f"Game Over! You lasted {time_lasted} seconds.")
+        quit_game()
  
-  clock.tick(60)
-  pygame.display.update()
+    clock.tick(FPS)
+    pygame.display.update()
