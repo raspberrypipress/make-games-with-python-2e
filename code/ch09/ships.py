@@ -1,19 +1,19 @@
 import pygame
 import projectiles
 import random
+from pygame import Vector2
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, surface, all_sprites):
-        super().__init__()
+    def __init__(self, surface, *groups):
+        super().__init__(*groups)
         self.surface = surface
         
         # Load image and set up sprite
         self.image = pygame.image.load("assets/you_ship.png")
-        self.rect = self.image.get_rect()
-        
-        self.rect.centerx = surface.get_width() / 2
-        self.rect.bottom = surface.get_height() - 10
+        x_pos = surface.get_width() // 2
+        y_pos = surface.get_height() - 10
+        self.rect = self.image.get_rect(midbottom=(x_pos, y_pos))        
         
         # Instance attributes
         self.health = 5
@@ -23,22 +23,19 @@ class Player(pygame.sprite.Sprite):
         
         # Use sprite group for bullets
         self.bullets = pygame.sprite.Group()
-        self.all_sprites = all_sprites
-        all_sprites.add(self)
+        self.groups = groups
 
     def set_position(self, pos):
         self.rect.centerx = pos[0]
 
     def fire(self):
         bullet = projectiles.Bullet(
-            self.rect.centerx, 
-            self.rect.top, 
-            self.bullet_speed, 
+            self.rect.midtop,
+            self.bullet_speed,
             self.bullet_image,
-            self.surface.get_height(),
-            self.all_sprites
+            self.surface.get_height()
         )
-        self.bullets.add(bullet)
+        bullet.add(self.groups, self.bullets)
         
         # Play sound
         sound = pygame.mixer.Sound(self.sound_effect)
@@ -59,28 +56,24 @@ class Player(pygame.sprite.Sprite):
 
 class Enemy(Player):
 
-    def __init__(self, surface, all_sprites, health):
-        super().__init__(surface, all_sprites)
+    def __init__(self, surface, health, *groups):
+        super().__init__(surface, *groups)
         
         # Override player-specific attributes
         self.image = pygame.image.load("assets/them_ship.png")
-        self.rect = self.image.get_rect()
-        self.rect.centerx = random.randint(0, self.surface.get_width())
-        self.rect.y = -60
+        x_pos = random.randint(0, self.surface.get_width())
+        self.rect = self.image.get_rect(midtop=(x_pos, -60))
         
         self.sound_effect = 'sounds/enemy_laser.wav'
         self.bullet_image = "assets/them_pellet.png"
         self.bullet_speed = 10
-        self.speed = 2
+        self.speed = Vector2(0, 2)
         self.health = health
-        
-        # Reset bullets group for enemy
-        self.bullets = pygame.sprite.Group()
 
     def update(self):
         super().update()
 
-        self.rect.y += self.speed
+        self.rect.move_ip(self.speed)
         if self.rect.y >= self.surface.get_height():
             self.kill()
 
