@@ -5,15 +5,14 @@ from pygame import Vector2
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, surface, *groups):
+    def __init__(self, surf, *groups):
         super().__init__(*groups)
-        self.surface = surface
         
         # Load image and set up sprite
         self.image = pygame.image.load("assets/you_ship.png")
-        x_pos = surface.get_width() // 2
-        y_pos = surface.get_height() - 10
-        self.rect = self.image.get_rect(midbottom=(x_pos, y_pos))        
+        midbottom = surf.get_rect().midbottom - Vector2(0, 10)
+        self.rect = self.image.get_rect(midbottom=midbottom)
+        self.surface = surf
         
         # Instance attributes
         self.health = 5
@@ -46,7 +45,6 @@ class Player(pygame.sprite.Sprite):
         self.health -= 1
 
     def check_for_hit(self, target):
-
         hit_bullets = pygame.sprite.spritecollide(target, self.bullets, True)
         if hit_bullets:
             target.register_hit()
