@@ -12,7 +12,6 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load("assets/you_ship.png")
         midbottom = win.get_rect().midbottom - Vector2(0, 10)
         self.rect = self.image.get_rect(midbottom=midbottom)
-        self.window = win
         
         # Instance attributes
         self.health = 5
@@ -20,9 +19,8 @@ class Player(pygame.sprite.Sprite):
         self.bullet_image = "assets/you_pellet.png"
         self.bullet_speed = -10
         
-        # Use sprite group for bullets
         self.bullets = pygame.sprite.Group()
-        self.groups = groups
+        self.window = win
 
     def set_position(self, pos):
         self.rect.centerx = pos[0]
@@ -34,23 +32,22 @@ class Player(pygame.sprite.Sprite):
             self.bullet_image,
             self.window.get_height()
         )
-        bullet.add(self.groups, self.bullets)
+        bullet.add(self.groups(), self.bullets)
         
         # Play sound
         sound = pygame.mixer.Sound(self.sound_effect)
         sound.set_volume(0.1)
         sound.play()
 
+    def check_for_hit(self, t):
+        if pygame.sprite.spritecollide(t, self.bullets, True):
+            t.register_hit()
+
+        if t.health <= 0:
+            t.kill()
+
     def register_hit(self):
         self.health -= 1
-
-    def check_for_hit(self, target):
-        hit_bullets = pygame.sprite.spritecollide(target, self.bullets, True)
-        if hit_bullets:
-            target.register_hit()
-
-        if target.health <= 0:
-            target.kill()
 
 class Enemy(Player):
 
