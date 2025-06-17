@@ -1,9 +1,9 @@
-import pygame as pg
+import pygame
 import projectiles
 import random
-from pygame import Vector2
+from pygame import Vector2, Surface
 
-class Player(pg.sprite.Sprite):
+class Player(pygame.sprite.Sprite):
 
     MAX_HEALTH = 5
     MAX_SHIELD = 3
@@ -12,14 +12,11 @@ class Player(pg.sprite.Sprite):
     def __init__(self, win, *groups):
         super().__init__(*groups)
         
-        # One image for the ship, one for when it's 
-        # hit with shields up.
-        self.ship_img = pg.image.load("assets/you_ship.png")
-        self.shield_hit_img = self.ship_img.copy()
-        self.shield_img = pg.image.load("assets/shield1.png")
-        self.shield_img.set_alpha(240)
-        self.shield_hit_img.blit(self.shield_img, (-3, -2))
-        self.image = self.ship_img
+        self.ship_img = pygame.image.load(
+            "assets/you_ship.png")
+        self.shield_img = pygame.image.load(
+            "assets/shield1.png")
+        self.image = self.ship_img.copy()
 
         midbottom = win.get_rect().midbottom - Vector2(0, 10)
         self.rect = self.image.get_rect(midbottom=midbottom)
@@ -32,15 +29,16 @@ class Player(pg.sprite.Sprite):
         self.bullet_image = "assets/you_pellet.png"
         self.bullet_speed = -10
         
-        self.bullets = pg.sprite.Group()
+        self.bullets = pygame.sprite.Group()
         self.window = win
 
     def update(self):
-        self.image = self.ship_img
+        self.image.fill((0, 0, 0, 0))
+        self.image.blit(self.ship_img, (0, 0))
         if self.last_hit > 0 and self.shield > 0:
-            elapsed = pg.time.get_ticks() - self.last_hit
+            elapsed = pygame.time.get_ticks() - self.last_hit
             if elapsed < 250:
-                self.image = self.shield_hit_img
+                self.image.blit(self.shield_img, (-3, -2))
 
     def set_position(self, pos):
         self.rect.centerx = pos[0]
@@ -55,12 +53,12 @@ class Player(pg.sprite.Sprite):
         bullet.add(self.groups(), self.bullets)
         
         # Play sound
-        sound = pg.mixer.Sound(self.sound_effect)
+        sound = pygame.mixer.Sound(self.sound_effect)
         sound.set_volume(0.1)
         sound.play()
 
     def check_for_hit(self, t):
-        if pg.sprite.spritecollide(t, self.bullets, True):
+        if pygame.sprite.spritecollide(t, self.bullets, True):
             t.register_hit()
 
         if t.health <= 0:
@@ -71,17 +69,17 @@ class Player(pg.sprite.Sprite):
             self.health -= 1
         else:
             self.shield -= 1
-        self.last_hit = pg.time.get_ticks()
+        self.last_hit = pygame.time.get_ticks()
 
     def shield_meter(self):
         percent = self.shield / self.MAX_SHIELD
-        s = pg.Surface((percent * self.window.get_width(), 5))
+        s = Surface((percent * self.window.get_width(), 5))
         s.fill((62, 145, 180))
         return s
     
     def health_meter(self):
         percent = self.health / self.MAX_HEALTH
-        s = pg.Surface((percent * self.window.get_width(), 5))
+        s = Surface((percent * self.window.get_width(), 5))
         if self.health <= 1:
             which_colour = self.HEALTH_COLOURS[1]
         else:
@@ -95,8 +93,9 @@ class Enemy(Player):
         super().__init__(window, *groups)
         
         # Override player-specific attributes
-        self.ship_img = pg.image.load("assets/them_ship.png")
-        self.image = self.ship_img
+        self.ship_img = pygame.image.load(
+            "assets/them_ship.png")
+        self.image = self.ship_img.copy()
 
         x_pos = random.randint(0, self.window.get_width())
         x_pos = (window.get_width() / len) * idx
