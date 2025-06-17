@@ -97,7 +97,6 @@ class Enemy(Player):
             "assets/them_ship.png")
         self.image = self.ship_img.copy()
 
-        x_pos = random.randint(0, self.window.get_width())
         x_pos = (window.get_width() / len) * idx
         self.rect = self.image.get_rect(midtop=(x_pos, -60))
         
