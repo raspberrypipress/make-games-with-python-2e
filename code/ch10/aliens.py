@@ -85,6 +85,8 @@ while True:
             time_lasted = (end_time - start_time) // 1000
 
         all_sprites.draw(window)
+        window.blit(ship.shield_meter(), (0, WIN_HEIGHT - 5))
+        window.blit(ship.health_meter(), (0, WIN_HEIGHT - 10))
 
     elif game_started and ship.health <= 0:
         print(f"Game Over! You lasted {time_lasted} seconds.")
