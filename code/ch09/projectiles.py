@@ -2,7 +2,8 @@ import pygame
 
 class Bullet(pygame.sprite.Sprite):
 
-    def __init__(self, midtop, speed, image_path, window_height):
+    def __init__(self, midtop, speed, 
+                 image_path, window_height):
         super().__init__()
         
         # Load and set up the image
@@ -17,5 +18,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.move_ip(self.velocity)
         
         # Remove bullet if it goes off screen
-        if self.rect.bottom < 0 or self.rect.top > self.window_height:
+        if (self.rect.bottom < 0 or 
+            self.rect.top > self.window_height):
+
             self.kill()
