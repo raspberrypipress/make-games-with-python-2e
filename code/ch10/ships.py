@@ -91,7 +91,7 @@ class Player(pg.sprite.Sprite):
 
 class Enemy(Player):
 
-    def __init__(self, window, *groups):
+    def __init__(self, window, idx, len, *groups):
         super().__init__(window, *groups)
         
         # Override player-specific attributes
@@ -99,12 +99,13 @@ class Enemy(Player):
         self.image = self.ship_img
 
         x_pos = random.randint(0, self.window.get_width())
+        x_pos = (window.get_width() / len) * idx
         self.rect = self.image.get_rect(midtop=(x_pos, -60))
         
         self.sound_effect = 'sounds/enemy_laser.wav'
         self.bullet_image = "assets/them_pellet.png"
         self.bullet_speed = 10
-        self.speed = Vector2(0, 2)
+        self.speed = Vector2(0, 4)
         self.health = 1
         self.shield = 0
 
