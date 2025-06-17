@@ -13,7 +13,7 @@ class Fred(pygame.sprite.Sprite):
         super().__init__()
         
         # Set initial image and rect
-        self.image = Fred.DEFAULT_IMG
+        self.image = self.DEFAULT_IMG
         self.rect = self.image.get_rect()
         
         self.window_dims = Vector2(win_width, win_height)
@@ -26,7 +26,7 @@ class Fred(pygame.sprite.Sprite):
 
         self.is_hit = False
         self.time_hit = 0
-        self.health = Fred.MAX_HEALTH
+        self.health = self.MAX_HEALTH
         self.direction = 1  # 0 = left, 1 = right
 
     def set_direction(self, direction):
@@ -35,7 +35,7 @@ class Fred(pygame.sprite.Sprite):
         # Make sure Fred remains within bounds before moving
         left_max = 0
         right_max = self.window_dims.x
-        next_x = self.rect.x + Fred.SPEED * self.direction
+        next_x = self.rect.x + self.SPEED * self.direction
         if left_max < next_x < right_max - self.rect.width:
             self.rect.x = next_x
 
@@ -56,16 +56,16 @@ class Fred(pygame.sprite.Sprite):
 
         # Update sprite image based on hit state
         if self.is_hit:
-            self.image = Fred.HIT_IMG
+            self.image = self.HIT_IMG
         else:
-            self.image = Fred.DEFAULT_IMG
+            self.image = self.DEFAULT_IMG
         # Flip the image if Fred is facing left
         if self.direction == -1:
             self.image = pygame.transform.flip(self.image,
                                                True, False)
     
     def health_meter(self):
-        health_percentage = self.health / Fred.MAX_HEALTH
+        health_percentage = self.health / self.MAX_HEALTH
         surf = pygame.Surface((health_percentage
                                * self.window_dims.x, 10))
         surf.fill((175,59,59))
