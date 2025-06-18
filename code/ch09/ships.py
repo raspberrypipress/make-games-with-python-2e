@@ -15,7 +15,7 @@ class Player(pygame.sprite.Sprite):
         
         # Instance attributes
         self.health = 5
-        self.sound_effect = 'sounds/player_laser.wav'
+        self.sound_effect = "sounds/player_laser.wav"
         self.bullet_image = "assets/you_pellet.png"
         self.bullet_speed = -10
         
@@ -59,7 +59,7 @@ class Enemy(Player):
         x_pos = random.randint(0, self.window.get_width())
         self.rect = self.image.get_rect(midtop=(x_pos, -60))
         
-        self.sound_effect = 'sounds/enemy_laser.wav'
+        self.sound_effect = "sounds/enemy_laser.wav"
         self.bullet_image = "assets/them_pellet.png"
         self.bullet_speed = 10
         self.speed = Vector2(0, 2)

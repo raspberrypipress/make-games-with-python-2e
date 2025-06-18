@@ -25,7 +25,7 @@ class Player(pygame.sprite.Sprite):
         self.health = self.MAX_HEALTH
         self.shield = self.MAX_SHIELD
         self.last_hit = 0
-        self.sound_effect = 'sounds/player_laser.wav'
+        self.sound_effect = "sounds/player_laser.wav"
         self.bullet_image = "assets/you_pellet.png"
         self.bullet_speed = -10
         
@@ -33,6 +33,7 @@ class Player(pygame.sprite.Sprite):
         self.window = win
 
     def update(self):
+        super().update()
         self.image.fill((0, 0, 0, 0))
         self.image.blit(self.ship_img, (0, 0))
         if self.last_hit > 0 and self.shield > 0:
@@ -97,10 +98,10 @@ class Enemy(Player):
             "assets/them_ship.png")
         self.image = self.ship_img.copy()
 
-        x_pos = (window.get_width() / len) * idx
+        x_pos = (window.get_width() // len) * idx
         self.rect = self.image.get_rect(midtop=(x_pos, -60))
         
-        self.sound_effect = 'sounds/enemy_laser.wav'
+        self.sound_effect = "sounds/enemy_laser.wav"
         self.bullet_image = "assets/them_pellet.png"
         self.bullet_speed = 10
         self.speed = Vector2(0, 4)

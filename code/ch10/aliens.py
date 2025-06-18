@@ -1,5 +1,4 @@
 import pygame
-import random
 import ships
 import gamelevels
 
@@ -39,7 +38,7 @@ ship = ships.Player(window, all_sprites)
 def add_new_wave():
     global curr_lvl, curr_wave, show_msg, game_won, last_lvl
 
-    this_level = gamelevels.level[curr_lvl]["structure"][:2]
+    this_level = gamelevels.level[curr_lvl]["structure"]
     if curr_wave < len(this_level):
         wave = this_level[curr_wave]
         for idx, enemy in enumerate(wave):
@@ -73,7 +72,6 @@ def reset_game():
     last_lvl = False
 
     # Add the ship back to the sprites group.
-    # Even if we killed it, it still exists because we have a reference to it.
     all_sprites.add(ship)
     ship.health = ship.MAX_HEALTH
     ship.shield = ship.MAX_SHIELD
