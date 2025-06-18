@@ -68,7 +68,7 @@ def move(direction, jump):
     # Increase x velocity if we're moving but not at maximum.
     if direction and abs(player_vx) < MAX_VX:
         # But only if we're not in the air!
-        if player_vy == 0:
+        if player_y >= WIN_HEIGHT - PLAYER_SIZE:
             player_vx = player_vx * 1.1
 
 # How to quit our program
