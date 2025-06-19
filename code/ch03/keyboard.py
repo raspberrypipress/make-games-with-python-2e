@@ -3,11 +3,12 @@ import pygame
 # Pygame Variables
 pygame.init()
 clock = pygame.time.Clock()
+FPS = 60
 
 WIN_WIDTH = 800
 WIN_HEIGHT = 800
 
-surface = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption('Pygame Keyboard!')
 
 # Constants
@@ -72,13 +73,12 @@ def move(direction, jump):
             player_vx = player_vx * 1.1
 
 # How to quit our program
-def quitGame():
+def quit_game():
     pygame.quit()
     raise SystemExit
 
 while True:
-
-    surface.fill((0,0,0))
+    window.fill((0,0,0))
 
     jump = False
 
@@ -86,12 +86,12 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                quitGame()
+                quit_game()
             if event.key == pygame.K_UP:
                 jump = True
 
         if event.type == pygame.QUIT:
-            quitGame()
+            quit_game()
 
     pressed_keys = pygame.key.get_pressed()
     if pressed_keys[pygame.K_LEFT]:
@@ -101,10 +101,8 @@ while True:
     else:
         move(0, jump)
 
-    pygame.draw.rect(surface, (255,0,0), 
+    pygame.draw.rect(window, (255,0,0), 
                      (player_x, player_y, 
                       PLAYER_SIZE, PLAYER_SIZE))
-
     pygame.display.update()
-
-    clock.tick(60)
+    clock.tick(FPS)
