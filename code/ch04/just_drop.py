@@ -122,6 +122,10 @@ game_ended = False
 NEW_PLATFORM = pygame.USEREVENT + 0
 while True:
     for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                raise SystemExit
         if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
@@ -135,7 +139,7 @@ while True:
  
     # Handle keyboard input
     direction = 0
-    pressed_keys = pygame.key.get_pressed()            
+    pressed_keys = pygame.key.get_pressed()
     if pressed_keys[pygame.K_LEFT]:
         direction = -1
     elif pressed_keys[pygame.K_RIGHT]:
