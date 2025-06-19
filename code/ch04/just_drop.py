@@ -114,6 +114,10 @@ def check_game_over():
         game_ended = True
         game_started = False
 
+def quit_game():
+    pygame.quit()
+    raise SystemExit
+
 all_sprites = pygame.sprite.Group()
 player = None
 platform_delay = 2000
@@ -124,11 +128,9 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                raise SystemExit
+                quit_game()
         if event.type == pygame.QUIT:
-            pygame.quit()
-            raise SystemExit
+            quit_game()
         if event.type == NEW_PLATFORM:
             new_platform = Platform()
             all_sprites.add(new_platform)
