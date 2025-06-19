@@ -77,6 +77,12 @@ def quit_game():
     pygame.quit()
     raise SystemExit
 
+joystick = None
+joy_threshold = 0.05
+pygame.joystick.init()
+if pygame.joystick.get_count() > 0:
+    joystick = pygame.joystick.Joystick(0)
+
 while True:
     window.fill((0,0,0))
 
@@ -90,16 +96,30 @@ while True:
             if event.key == pygame.K_UP:
                 jump = True
 
+        if event.type == pygame.JOYBUTTONDOWN:
+            jump = True
+
         if event.type == pygame.QUIT:
             quit_game()
 
-    pressed_keys = pygame.key.get_pressed()
-    if pressed_keys[pygame.K_LEFT]:
-        move(-1, jump)
-    elif pressed_keys[pygame.K_RIGHT]:
-        move(1, jump)
+    if joystick:
+        x_axis = joystick.get_axis(0)
+        if abs(x_axis) <= joy_threshold:
+            move(0,jump)
+        elif x_axis > joy_threshold:
+            move(1, jump)
+        elif x_axis <= -joy_threshold:
+            move(-1, jump)
+
     else:
-        move(0, jump)
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[pygame.K_LEFT]:
+            move(-1, jump)
+        elif pressed_keys[pygame.K_RIGHT]:
+            move(1, jump)
+        else:
+            move(0, jump)
+
 
     pygame.draw.rect(window, (255,0,0), 
                      (player_x, player_y, 
