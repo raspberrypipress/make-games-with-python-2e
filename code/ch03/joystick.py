@@ -3,11 +3,12 @@ import pygame
 # Pygame Variables
 pygame.init()
 clock = pygame.time.Clock()
+FPS = 60
 
 WIN_WIDTH = 800
 WIN_HEIGHT = 800
 
-surface = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption('Pygame Keyboard!')
 
 # Constants
@@ -68,22 +69,16 @@ def move(direction, jump):
     # Increase x velocity if we're moving but not at maximum.
     if direction and abs(player_vx) < MAX_VX:
         # But only if we're not in the air!
-        if player_vy == 0:
+        if player_y >= WIN_HEIGHT - PLAYER_SIZE:
             player_vx = player_vx * 1.1
 
 # How to quit our program
-def quitGame():
+def quit_game():
     pygame.quit()
     raise SystemExit
 
-joystick = None
-joy_threshold = 0.05
-if pygame.joystick.get_count() > 0:
-    joystick = pygame.joystick.Joystick(0)
-
 while True:
-
-    surface.fill((0,0,0))
+    window.fill((0,0,0))
 
     jump = False
 
@@ -91,38 +86,23 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                quitGame()
+                quit_game()
             if event.key == pygame.K_UP:
                 jump = True
 
-        if event.type == pygame.JOYBUTTONDOWN:
-            jump = True
-
         if event.type == pygame.QUIT:
-            quitGame()
+            quit_game()
 
-    if joystick:
-        x_axis = joystick.get_axis(0)
-        if abs(x_axis) <= joy_threshold:
-            move(0,jump)
-        elif x_axis > joy_threshold:
-            move(1, jump)
-        elif x_axis <= -joy_threshold:
-            move(-1, jump)
-
+    pressed_keys = pygame.key.get_pressed()
+    if pressed_keys[pygame.K_LEFT]:
+        move(-1, jump)
+    elif pressed_keys[pygame.K_RIGHT]:
+        move(1, jump)
     else:
-        pressed_keys = pygame.key.get_pressed()
-        if pressed_keys[pygame.K_LEFT]:
-            move(-1, jump)
-        elif pressed_keys[pygame.K_RIGHT]:
-            move(1, jump)
-        else:
-            move(0, jump)
+        move(0, jump)
 
-    pygame.draw.rect(surface, (255,0,0), 
+    pygame.draw.rect(window, (255,0,0), 
                      (player_x, player_y, 
                       PLAYER_SIZE, PLAYER_SIZE))
-
     pygame.display.update()
-
-    clock.tick(60)
+    clock.tick(FPS)
