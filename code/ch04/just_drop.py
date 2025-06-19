@@ -99,7 +99,7 @@ class Platform(pygame.sprite.Sprite):
 
 def restart_game():
     global all_sprites, player, platform_delay, game_started
-    all_sprites.clear()
+    all_sprites.empty()
     player = Player()
     all_sprites.add(player)
     platform_delay = 2000
