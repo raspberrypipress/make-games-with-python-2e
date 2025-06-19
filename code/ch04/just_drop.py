@@ -64,6 +64,8 @@ class Player(pygame.sprite.Sprite):
 
 
 class Platform(pygame.sprite.Sprite):
+    HEIGHT = 20
+    GAP = 50
     def __init__(self):
         super().__init__()
 
@@ -71,20 +73,20 @@ class Platform(pygame.sprite.Sprite):
         self.y = WIN_HEIGHT
         self.speed = 2
 
-        self.image = pygame.Surface((WIN_WIDTH, 20), 
+        self.image = pygame.Surface((WIN_WIDTH, self.HEIGHT), 
                                     pygame.SRCALPHA)
         self.image.fill((255, 255, 255, 255)) # solid platform
 
         # Draw a gap
-        gap_loc = random.randint(0, WIN_WIDTH-50)
+        gap_loc = random.randint(0, WIN_WIDTH-self.GAP)
         pygame.draw.rect(self.image, (255,255,255,0), 
-                         (gap_loc, 0, 50, 20))
+                         (gap_loc, 0, self.GAP, self.HEIGHT))
 
         # Create a collision mask
         self.mask = pygame.mask.from_surface(self.image)
-        # Scale it so we ignore collisions halfway through the gap
-        self.mask= self.mask.scale((self.image.get_width(),
-                                    self.image.get_height() * .5))
+        # Scaling to ignore collisions halfway through the gap
+        self.mask = self.mask.scale((WIN_WIDTH,
+                                     self.HEIGHT * .5))
 
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
