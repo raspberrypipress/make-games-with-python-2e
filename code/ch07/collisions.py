@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+import itertools
 from pygame.math import Vector2
 
 pygame.init()
@@ -60,56 +61,54 @@ def draw_current_object():
                        int(current_obj["radius"]), 0)
 
 def handle_collisions():
-    for o in collidables:
-        other_objs = [x for x in collidables if x is not o]
-        for other in other_objs:
+    for (o, other) in itertools.combinations(collidables, 2):
 
-            distance = other["pos"].distance_to(o["pos"])
-            if distance < other["radius"] + o["radius"]:
+        distance = other["pos"].distance_to(o["pos"])
+        if distance < other["radius"] + o["radius"]:
 
-                # Angle of the collision between the two
-                coll = o["pos"] - other["pos"]
-                coll_angle = math.atan2(-coll.y, coll.x)
+            # Angle of the collision between the two
+            coll = o["pos"] - other["pos"]
+            coll_angle = math.atan2(-coll.y, coll.x)
 
-                # Calculate the speed of each object
-                obj_speed = o["velocity"].magnitude()
-                other_speed = other["velocity"].magnitude()
+            # Calculate the speed of each object
+            obj_speed = o["velocity"].magnitude()
+            other_speed = other["velocity"].magnitude()
 
-                # Get direction of the objects in radians
-                obj_dir = math.atan2(-o["velocity"].y,
-                                     o["velocity"].x)
-                other_dir = math.atan2(-other["velocity"].y,
-                                       other["velocity"].x)
+            # Get direction of the objects in radians
+            obj_dir = math.atan2(-o["velocity"].y,
+                                    o["velocity"].x)
+            other_dir = math.atan2(-other["velocity"].y,
+                                    other["velocity"].x)
 
-                # Calculate the post-collision velocity
-                obj_angle = obj_dir - coll_angle
-                obj_new_ang = Vector2(math.cos(obj_angle),
-                                      math.sin(obj_angle))
-                obj_new_vel = obj_new_ang * obj_speed
+            # Calculate the post-collision velocity
+            obj_angle = obj_dir - coll_angle
+            obj_new_ang = Vector2(math.cos(obj_angle),
+                                    math.sin(obj_angle))
+            obj_new_vel = obj_new_ang * obj_speed
 
-                other_angle = other_dir - coll_angle
-                other_new_ang = Vector2(math.cos(other_angle),
-                                        math.sin(other_angle))
-                other_new_vel = other_new_ang * other_speed
+            other_angle = other_dir - coll_angle
+            other_new_ang = Vector2(math.cos(other_angle),
+                                    math.sin(other_angle))
+            other_new_vel = other_new_ang * other_speed
 
-                # Adjust velocity based on object masses
-                mass = o["mass"]
-                other_mass = other["mass"]
+            # Adjust velocity based on object masses
+            mass = o["mass"]
+            other_mass = other["mass"]
 
-                obj_final_vel = (
-                    ((mass - other_mass) * obj_new_vel
-                     + (other_mass * 2) * other_new_vel)
-                    / (mass + other_mass)
-                )
-                other_final_vel = (
-                    ((mass * 2) * obj_new_vel
-                     + (other_mass - mass) * other_new_vel)
-                    / (mass + other_mass)
-                )
+            obj_final_vel = (
+                ((mass - other_mass) * obj_new_vel
+                    + (other_mass * 2) * other_new_vel)
+                / (mass + other_mass)
+            )
+            other_final_vel = (
+                ((mass * 2) * obj_new_vel
+                    + (other_mass - mass) * other_new_vel)
+                / (mass + other_mass)
+            )
 
-                # Set the final velocities
-                o["velocity"] = obj_final_vel
-                other["velocity"] = other_final_vel
+            # Set the final velocities
+            o["velocity"].x = obj_final_vel.x
+            other["velocity"].x = other_final_vel.x
 
 def handle_mouse_down():
     global current_obj, expansion
