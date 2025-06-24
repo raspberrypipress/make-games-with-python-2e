@@ -26,8 +26,8 @@ def check_bounds():
             is_dragging = True
             pygame.mouse.set_visible(0)
     else:
-        pygame.mouse.set_visible(1)
         is_dragging = False
+        pygame.mouse.set_visible(1)
 
 def check_gravity():
     global gravity, square_y
