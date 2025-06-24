@@ -9,10 +9,11 @@ while True:
             raise SystemExit
 
     # Begin drawing statements
-    pygame.draw.circle(window,(255,255,0),
+    # Filled
+    pygame.draw.circle(window, (255, 255, 0),
                        (200, 200), 20, 0)
     # Not filled
-    pygame.draw.circle(window,(255,255,0),
+    pygame.draw.circle(window, (255, 255, 0),
                        (300, 200), 20, 2)
     # End drawing statements
 

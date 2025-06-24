@@ -9,7 +9,7 @@ while True:
             raise SystemExit
 
     # Begin drawing statements
-    pygame.draw.rect(window, (255,0,0), (0, 0, 50, 30))
+    pygame.draw.rect(window, (255, 0, 0), (0, 0, 50, 30))
     # End drawing statements
 
     pygame.display.update()
