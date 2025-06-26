@@ -15,7 +15,7 @@ textFont = pygame.font.SysFont("monospace", 50)
 
 start_screen = pygame.image.load("assets/startgame.png")
 end_screen = pygame.image.load("assets/gameover.png")
-background = pygame.image.load("assets/background.png")
+bg_img = pygame.image.load("assets/background.png").convert()
 
 game_started = False
 start_time = 0
@@ -52,6 +52,32 @@ def quit_game():
     pygame.quit()
     raise SystemExit
 
+def have_a_bad_day():
+    global time_lasted
+    
+    window.blit(bg_img, (0, 0))
+
+    # Set Fred's direction based on the keys pressed
+    pressed_keys = pygame.key.get_pressed()
+    if pressed_keys[pygame.K_LEFT]:
+        fred.set_direction(-1)
+    elif pressed_keys[pygame.K_RIGHT]:
+        fred.set_direction(1)  
+
+    fred.update()
+    barrels.update()
+
+    # Check for collisions and check Fred's health
+    fred.check_collisions(barrels)
+    if fred.health <= 0:
+        time_tick = pygame.time.get_ticks()
+        time_lasted = (time_tick - start_time) // 1000
+
+    # Draw the barrels, Fred, and the health meter
+    barrels.draw(window)
+    window.blit(fred.image, fred.rect)
+    window.blit(fred.health_meter(), (0, WIN_HEIGHT - 10))
+
 # main loop
 while True:
 
@@ -75,28 +101,7 @@ while True:
 
     # If the game is started and Fred's alive, play the game
     elif game_started and fred.health > 0:
-        window.blit(background, (0, 0))
-
-        # Set Fred's direction based on the keys pressed
-        pressed_keys = pygame.key.get_pressed()
-        if pressed_keys[pygame.K_LEFT]:
-            fred.set_direction(-1)
-        elif pressed_keys[pygame.K_RIGHT]:
-            fred.set_direction(1)  
-
-        fred.update()
-        barrels.update()
-
-        # Check for collisions and check Fred's health
-        fred.check_collisions(barrels)
-        if fred.health <= 0:
-            time_tick = pygame.time.get_ticks()
-            time_lasted = (time_tick - start_time) // 1000
-
-        # Draw the barrels, Fred, and the health meter
-        barrels.draw(window)
-        window.blit(fred.image, fred.rect)
-        window.blit(fred.health_meter(), (0, WIN_HEIGHT - 10))
+        have_a_bad_day()
 
     # If Fred's health falls to 0, it's game over!
     elif fred.health <= 0:
